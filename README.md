@@ -175,7 +175,7 @@ $ internetdata db list
 ID            NAME      LICENSE   STANDING    TERM
 vpn_ip_v1     VPN IP    standard  licensed    renews 2027-01-04
 bogon_ip_v1   Bogon IP  standard  licensed
-asn_v1        ASN                 unlicensed
+tor_ip_v1     Tor IP              unlicensed
 
 $ internetdata db metadata vpn_ip_v1
 $ internetdata db checksum vpn_ip_v1 --format mmdb

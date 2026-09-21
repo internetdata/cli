@@ -26,3 +26,14 @@ when you change a shared mechanic.
   There is no default command to fall into.
 - **No color.** Nothing prints any once the lookup output is gone, so neither
   `--nocolor` nor `fatih/color` came across.
+
+## Channel state (2026-09-21, v1.0.0)
+
+GitHub release, ghcr (public, anonymous pull), the tap (`brew trust` then
+`brew install`, Homebrew 7.0.4 on Linux), apt (`apt.internetdata.io`) and
+`go install` were each verified installing 1.0.0. Chocolatey 1.0.0 sits in
+moderation and winget's first manifest is microsoft/winget-pkgs#438455, so the
+README names neither: add each once it installs, per `docs/cli/releasing.md`.
+Until that PR merges every release's `winget` job is red by design: the org's
+`WINGET_TOKEN` already reaches this repo, and winget-releaser only bumps a
+package that exists.
