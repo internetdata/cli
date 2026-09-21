@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>internetdata</id>
+    <version>0.0.0</version>
+    <packageSourceUrl>https://github.com/internetdata/cli</packageSourceUrl>
+    <owners>Mslm Dev</owners>
+    <title>InternetData CLI</title>
+    <authors>Mslm Dev</authors>
+    <projectUrl>https://internetdata.io</projectUrl>
+    <iconUrl>https://s3.internetdata.io/internetdata-public/brand/mark.svg</iconUrl>
+    <licenseUrl>https://github.com/internetdata/cli/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/internetdata/cli</projectSourceUrl>
+    <docsUrl>https://github.com/internetdata/cli#readme</docsUrl>
+    <bugTrackerUrl>https://github.com/internetdata/cli/issues</bugTrackerUrl>
+    <tags>ip asn database mmdb geolocation networking cli</tags>
+    <summary>Official CLI for the InternetData API</summary>
+    <description>
+List the IP and network databases your organization is licensed for, see what
+is inside one before you fetch it, and download it in CSV.GZ or MMDB, verified
+against its published checksum.
+
+Needs an API key carrying the `db.download` scope; `internetdata login` signs in
+through the browser.
+    </description>
+    <releaseNotes>https://github.com/internetdata/cli/releases/tag/v@VSN@</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

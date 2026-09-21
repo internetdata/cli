@@ -1,0 +1,11 @@
+Package: internetdata
+Version: 0.0.0
+Section: net
+Priority: optional
+Architecture: amd64
+Maintainer: Mslm Dev <support@internetdata.io>
+Homepage: https://internetdata.io
+Description: Official CLI for the InternetData API
+ List the IP and network databases your organization is licensed for, see
+ what is inside one before you fetch it, and download it in CSV.GZ or MMDB,
+ verified against its published checksum.
