@@ -98,7 +98,7 @@ PackageVersion: ${VSN}
 PackageLocale: en-US
 Publisher: Mslm
 PublisherUrl: https://mslm.io
-PublisherSupportUrl: https://github.com/internetdata/cli/issues
+PublisherSupportUrl: https://internetdata.io/contact
 PrivacyUrl: https://internetdata.io/privacy
 PackageName: InternetData CLI
 PackageUrl: https://internetdata.io
@@ -125,7 +125,7 @@ Tags:
 ReleaseNotesUrl: https://github.com/internetdata/cli/releases/tag/v${VSN}
 Documentations:
   - DocumentLabel: CLI documentation
-    DocumentUrl: https://github.com/internetdata/cli#readme
+    DocumentUrl: https://docs.internetdata.io/integrations/cli
 ManifestType: defaultLocale
 ManifestVersion: ${SCHEMA_VSN}
 EOF
