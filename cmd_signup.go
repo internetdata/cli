@@ -15,7 +15,7 @@ import (
 // Derived from the session's API host rather than fixed, so a session pointed
 // at another deployment sends you to that deployment's console instead of to
 // production - the one way this could quietly cost someone a real account they
-// did not want. Anything we do not recognise falls back to production.
+// did not want. Anything we do not recognize falls back to production.
 //
 // The API is served at the APEX, so there is usually no `api` label to swap
 // for `app`: the apex's console is `app.` on it, and a deployment leading the

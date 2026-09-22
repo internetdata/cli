@@ -105,7 +105,7 @@ func cmdDatabase() error {
 		if len(args) != 2 {
 			return errors.New("usage: database metadata <id>")
 		}
-		return dbMetadata(ctx, db, args[1], fJSON)
+		return dbMetadata(ctx, db, args[1])
 	case "checksum", "checksums":
 		if len(args) != 2 {
 			return errors.New("usage: database checksum <id>")
@@ -189,13 +189,10 @@ func licenseTerm(d internetdata.Database) string {
 	}
 }
 
-func dbMetadata(ctx context.Context, db *internetdata.DatabaseAPI, id string, asJSON bool) error {
+func dbMetadata(ctx context.Context, db *internetdata.DatabaseAPI, id string) error {
 	meta, err := db.Metadata(ctx, id)
 	if err != nil {
 		return explain(err)
-	}
-	if asJSON {
-		return emitJSON(meta)
 	}
 	return emitJSON(meta)
 }

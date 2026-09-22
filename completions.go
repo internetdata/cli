@@ -40,14 +40,9 @@ var completions = &complete.Command{
 			"--session": sessionNames(),
 			"--all":     predict.Nothing,
 		}},
-		"signup": {Flags: map[string]complete.Predictor{"--no-browser": predict.Nothing}},
-		"session": {Sub: map[string]*complete.Command{
-			"list":   {},
-			"use":    {Args: sessionNames()},
-			"show":   {Args: sessionNames()},
-			"rename": {Args: sessionNames()},
-			"rm":     {Args: sessionNames()},
-		}},
+		"signup":     {Flags: map[string]complete.Predictor{"--no-browser": predict.Nothing}},
+		"session":    sessionCompletions,
+		"sessions":   sessionCompletions,
 		"whoami":     {Flags: jsonFlags},
 		"config":     {Args: predict.Set([]string{"list", "retries="})},
 		"completion": {Args: predict.Set([]string{"install", "uninstall", "bash", "zsh", "fish"})},
@@ -65,7 +60,7 @@ var completions = &complete.Command{
 var databaseCompletions = &complete.Command{
 	Sub: map[string]*complete.Command{
 		"list":     {Flags: jsonFlags},
-		"metadata": {Flags: jsonFlags},
+		"metadata": {},
 		"checksum": {Flags: map[string]complete.Predictor{
 			"--format": formats, "--json": predict.Nothing, "-j": predict.Nothing,
 		}},
@@ -91,6 +86,17 @@ var loginCompletions = &complete.Command{
 		"--no-check":   predict.Nothing,
 		"--paste":      predict.Nothing,
 		"--no-browser": predict.Nothing,
+	},
+}
+
+// sessionCompletions is shared by `session` and its `sessions` alias.
+var sessionCompletions = &complete.Command{
+	Sub: map[string]*complete.Command{
+		"list":   {},
+		"use":    {Args: sessionNames()},
+		"show":   {Args: sessionNames()},
+		"rename": {Args: sessionNames()},
+		"rm":     {Args: sessionNames()},
 	},
 }
 

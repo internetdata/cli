@@ -31,7 +31,7 @@ func TestAuthBaseURL(t *testing.T) {
 		// label at all, and is still used exactly as given.
 		{"an apex-shaped deployment is not rewritten", "https://eu.example.com", "https://eu.example.com"},
 		{"a trailing slash does not double up", "https://api.example.com/", "https://api.example.com"},
-		{"an unrelated host is honoured, not rewritten", "https://api.example.com", "https://api.example.com"},
+		{"an unrelated host is honored, not rewritten", "https://api.example.com", "https://api.example.com"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

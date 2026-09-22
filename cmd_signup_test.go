@@ -3,7 +3,7 @@ package main
 import "testing"
 
 // The console URL is derived from the session's API host rather than listed,
-// so a new deployment needs no code change here. A host we do not recognise
+// so a new deployment needs no code change here. A host we do not recognize
 // must fall back to production rather than to a guess: sending someone to a
 // made-up console is worse than sending them to the real one.
 func TestSignupURL(t *testing.T) {
@@ -18,7 +18,7 @@ func TestSignupURL(t *testing.T) {
 		{"https://internetdata.io/", "https://app.internetdata.io/auth/signup"},
 		{"https://internetdata.io:8443", "https://app.internetdata.io/auth/signup"},
 		{"https://eu.internetdata.io", "https://app-eu.internetdata.io/auth/signup"},
-		// An api-labelled host keeps the sibling shape.
+		// An api-labeled host keeps the sibling shape.
 		{"https://api.internetdata.io", "https://app.internetdata.io/auth/signup"},
 		{"https://api-eu.internetdata.io", "https://app-eu.internetdata.io/auth/signup"},
 		// Nothing else is ours to rewrite.

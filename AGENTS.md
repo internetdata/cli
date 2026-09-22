@@ -14,7 +14,7 @@ when you change a shared mechanic.
 
 - **The API is at the apex (`internetdata.io`)**, so `signupURL()` has no `api`
   label to swap: the apex maps to `app.`, a three-label `E.internetdata.io` to
-  `app-E.internetdata.io`, and an `api`-labelled host keeps the sibling shape -
+  `app-E.internetdata.io`, and an `api`-labeled host keeps the sibling shape -
   the rule oauth_api's `consoleOriginForHost` implements for the device page.
   Anything else falls back to production. `cmd_signup_test.go` pins it.
 - **`whoami` has no entitlement to show.** It prints the credential first, so a
