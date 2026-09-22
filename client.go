@@ -32,6 +32,7 @@ func NewClient() (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	touchSession(key)
 	return &Client{api: api, key: key}, nil
 }
 
