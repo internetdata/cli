@@ -40,7 +40,11 @@ curl -Ls https://github.com/internetdata/cli/releases/latest/download/deb.sh | s
 
 ### Windows
 
-Install for the current user, which needs no admin rights:
+```powershell
+choco install internetdata
+```
+
+Or install for the current user, which needs no admin rights:
 
 ```powershell
 iwr -useb https://github.com/internetdata/cli/releases/latest/download/windows.ps1 | iex
