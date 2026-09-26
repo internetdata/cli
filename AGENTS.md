@@ -3,14 +3,12 @@
 The official CLI, a presentation layer over `github.com/internetdata/sdk-go/v2`.
 Public repo: `github.com/internetdata/cli`, with gitea as a second push URL.
 
-A copy of `vpndetection/cli/vpndetection` minus everything the per-IP lookup
-API brought: no lookup, `bulk` or `myip`, no result cache, no field selection or
-output formats, no entitlement. The flat dispatch, the FOUR places a command
-lives, sessions, the device-flow login and the whole release plumbing are that
-CLI's, and so are their gotchas: read its `AGENTS.md` first, and change both
-when you change a shared mechanic.
+Structure: a flat dispatch in `main.go`, one `cmd_<name>.go` per command, and
+per-command completion predictors in `completions.go`. It lists, describes and
+downloads the databases an organization is licensed for; there is no per-IP
+lookup, result cache or field selection.
 
-## What differs, and why
+## The non-obvious parts
 
 - **The API is at the apex (`internetdata.io`)**, so `signupURL()` has no `api`
   label to swap: the apex maps to `app.`, a three-label `E.internetdata.io` to
@@ -24,8 +22,8 @@ when you change a shared mechanic.
   refused at login, and it arrives as a 401, not a 403: keys are default-deny.
 - **A bare invocation prints help, and an unknown word is named as a mistake.**
   There is no default command to fall into.
-- **No color.** Nothing prints any once the lookup output is gone, so neither
-  `--nocolor` nor `fatih/color` came across.
+- **No color.** Nothing prints any, so there is no `--nocolor` and no
+  `fatih/color`.
 
 ## Channel state (2026-09-25, v1.0.1)
 
