@@ -37,7 +37,8 @@ Chocolatey approved 1.0.0 and 1.0.1 on 2026-09-24, so the README names
 `choco install`. Every version waits for a human, and 1.0.1 was packed from
 `main` because its tag's push was refused while 1.0.0 sat in moderation
 (`docs/cli/channel-windows.md`).
-winget's first manifest is microsoft/winget-pkgs#438455, and the README names
-winget once it installs, per `docs/cli/releasing.md`. Until that PR merges
+winget's first manifest is microsoft/winget-pkgs#441588, as `InternetData.CLI`
+(the `Mslm.InternetData` PR was withdrawn unmerged, 2026-09-26), and the README
+names winget once it installs, per `docs/cli/releasing.md`. Until that PR merges
 every release's `winget` job is red by design: the org's `WINGET_TOKEN` already
 reaches this repo, and winget-releaser only bumps a package that exists.
