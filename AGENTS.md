@@ -15,7 +15,7 @@ when you change a shared mechanic.
 - **The API is at the apex (`internetdata.io`)**, so `signupURL()` has no `api`
   label to swap: the apex maps to `app.`, a three-label `E.internetdata.io` to
   `app-E.internetdata.io`, and an `api`-labeled host keeps the sibling shape -
-  the rule oauth_api's `consoleOriginForHost` implements for the device page.
+  the same rule the API applies to its device page.
   Anything else falls back to production. `cmd_signup_test.go` pins it.
 - **`whoami` has no entitlement to show.** It prints the credential first, so a
   refused key still says which key it was, then the families the organization
@@ -35,10 +35,9 @@ The tap's formula names 1.0.1 with the release's own checksums; 1.0.0 was
 installed from it (`brew trust` then `brew install`, Homebrew 7.0.4 on Linux).
 Chocolatey approved 1.0.0 and 1.0.1 on 2026-09-24, so the README names
 `choco install`. Every version waits for a human, and 1.0.1 was packed from
-`main` because its tag's push was refused while 1.0.0 sat in moderation
-(`docs/cli/channel-windows.md`).
+`main` because its tag's push was refused while 1.0.0 sat in moderation.
 winget's first manifest is microsoft/winget-pkgs#441588, as `InternetData.CLI`
 (the `Mslm.InternetData` PR was withdrawn unmerged, 2026-09-26), and the README
-names winget once it installs, per `docs/cli/releasing.md`. Until that PR merges
+names winget once it installs. Until that PR merges
 every release's `winget` job is red by design: the org's `WINGET_TOKEN` already
 reaches this repo, and winget-releaser only bumps a package that exists.
