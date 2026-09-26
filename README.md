@@ -1,4 +1,4 @@
-# [<img src="https://s3.internetdata.io/internetdata-public/brand/mark.svg" alt="InternetData" width="24"/>](https://internetdata.io/) InternetData CLI
+# [<img src="https://s3.internetdata.io/internetdata-public/brand/mark.svg" alt="InternetData" height="28"/>](https://internetdata.io/) InternetData CLI
 
 [![release](https://img.shields.io/github/v/release/internetdata/cli)](https://github.com/internetdata/cli/releases)
 [![license](https://img.shields.io/github/license/internetdata/cli)](LICENSE)
