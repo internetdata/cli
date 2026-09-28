@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.1.0 - 2026-09-28
+
+### Features
+
+- Take sdk-go v2.4.1: bound server-set waits, print sample fields in JSON ([`72117e7`](https://github.com/internetdata/cli/commit/72117e79d48442713c227c194516b1b25b039c9c))
+
 ## 1.0.1 - 2026-09-22
 
 ### Fixes
