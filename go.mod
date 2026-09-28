@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/internetdata/sdk-go/v2 v2.4.1
-	github.com/mslmio/libgo-complete v1.0.0
+	github.com/mslmio/libgo-complete v1.0.1
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/spf13/pflag v1.0.10
 	golang.org/x/term v0.46.0
