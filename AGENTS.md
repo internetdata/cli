@@ -32,8 +32,8 @@ GitHub release (its notes are the version's CHANGELOG.md section), ghcr
 and `go install` were each verified installing 1.1.0. The tap's formula names
 1.1.0 with the release's own checksums; 1.0.0 was installed from it (`brew
 trust` then `brew install`, Homebrew 7.0.4 on Linux). Chocolatey approved 1.0.0
-and 1.0.1 on 2026-09-24, so the README names `choco install`; every version
-waits for a human, and 1.1.0 went into moderation from its tag's job.
+and 1.0.1 on 2026-09-24 and 1.1.0 on 2026-09-28, so the README names `choco
+install`; every version waits for a human.
 winget's first manifest is microsoft/winget-pkgs#441588, as `InternetData.CLI`
 (the `Mslm.InternetData` PR was withdrawn unmerged, 2026-09-26), and the README
 names winget once it installs. Until that PR merges
