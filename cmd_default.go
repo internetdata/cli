@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/pflag"
 )
@@ -72,14 +71,4 @@ func cmdDefault() error {
 	}
 	printHelpDefault()
 	return nil
-}
-
-// isTerminal reports whether a file is attached to a terminal rather than a
-// pipe or a redirect.
-func isTerminal(f *os.File) bool {
-	st, err := f.Stat()
-	if err != nil {
-		return false
-	}
-	return st.Mode()&os.ModeCharDevice != 0
 }
