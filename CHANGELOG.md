@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.1.1 - 2026-10-04
+
+### Fixes
+
+- Refuse to prompt for a key when stdin is /dev/null ([`42fc751`](https://github.com/internetdata/cli/commit/42fc751b1925095344759b28bebb789d1ebc0ced))
+
 ## 1.1.0 - 2026-09-28
 
 ### Features
