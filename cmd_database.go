@@ -246,8 +246,12 @@ func dbDownloads(ctx context.Context, db *internetdata.DatabaseAPI, limit int, a
 		if d.Bytes != nil {
 			size = humanBytes(int64(*d.Bytes))
 		}
+		name := d.DatasetID
+		if d.Sample {
+			name += " (sample)"
+		}
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
-			d.Created.Format(time.RFC3339), d.DatasetID, d.Format, d.Outcome, size)
+			d.Created.Format(time.RFC3339), name, d.Format, d.Outcome, size)
 	}
 	return w.Flush()
 }
