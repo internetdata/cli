@@ -2,6 +2,16 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.2.0 - 2026-10-07
+
+### Breaking changes
+
+- Print help for a bare session, as for every other command group ([`9e4d307`](https://github.com/internetdata/cli/commit/9e4d307c59b508bef8f27da29b3b9877bce2bb28))
+
+### Features
+
+- Mark an evaluation sample's download in the db downloads table ([`0a4eee9`](https://github.com/internetdata/cli/commit/0a4eee908b54534db6226f5b6fd63fefc112e2cc))
+
 ## 1.1.1 - 2026-10-04
 
 ### Fixes
