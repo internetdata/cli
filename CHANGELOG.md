@@ -2,6 +2,16 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.3.0 - 2026-10-09
+
+### Features
+
+- Take sdk-go v2.6.1: print the Open flag in JSON ([`ed4682d`](https://github.com/internetdata/cli/commit/ed4682d6d947c5953eb19c7a005d26170e283451))
+
+### Fixes
+
+- Say the Open databases download with any key, in db help and the README ([`ccc0ebb`](https://github.com/internetdata/cli/commit/ccc0ebbb3f7952c812adc5f0aa951ed8993cc6fd))
+
 ## 1.2.0 - 2026-10-07
 
 ### Breaking changes
