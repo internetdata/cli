@@ -25,9 +25,10 @@ func printHelpDatabase() {
 Description:
   The IP and network databases, published as files you host yourself.
 
-  Access is granted by contract rather than bought self-serve, and needs a key
-  carrying the 'db.download' scope. '%[1]s database list' shows every published
-  database and where your organization's license for it stands.
+  Every command needs a key carrying the 'db.download' scope. The Open
+  databases download with any organization's key, under CC BY-SA 4.0, and the
+  rest under a license granted by contract. '%[1]s db list' shows every
+  published database and where your organization's license for it stands.
 
 Commands:
   list                 published databases, with your license beside each.
