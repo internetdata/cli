@@ -2,6 +2,19 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.4.0 - 2026-10-10
+
+### Breaking changes
+
+- Refuse a config file other accounts can open, as ssh does ([`faba3ee`](https://github.com/internetdata/cli/commit/faba3ee3975cbec9c319d5aff9c2a2457e821aea))
+
+### Fixes
+
+- Never save over a config that could not be read ([`6087dca`](https://github.com/internetdata/cli/commit/6087dca39db7a80fcd4986a33e4b3bc4c628d68d))
+- Trim a key given by --key or the environment, as login does ([`dbb0be3`](https://github.com/internetdata/cli/commit/dbb0be3728de66aff1520a2d7c4370582cf22c61))
+- Fail whoami --json with no key, rather than print prose ([`7a0869f`](https://github.com/internetdata/cli/commit/7a0869f388baaf529a4101902fa92868a8046c82))
+- Point CI at INTERNETDATA_API_KEY, off the command line ([`7a0a986`](https://github.com/internetdata/cli/commit/7a0a9862fde64e2ecbe93bcae45dbf630e298a73))
+
 ## 1.3.0 - 2026-10-09
 
 ### Features
