@@ -125,10 +125,11 @@ Nothing is typed or pasted here, so the key never reaches your shell history. If
 
 `internetdata signup` is the same thing with the sign-up page first, so a new account and a working CLI are one step.
 
-For a CI job, pass the key directly instead:
+For a CI job, set the key in the job's environment instead. Every command reads `INTERNETDATA_API_KEY`, so nothing is stored on the runner, and the key never sits on a command line, where every account on the machine can read it from the process list:
 
 ```console
-$ internetdata login --key "$INTERNETDATA_API_KEY"
+$ export INTERNETDATA_API_KEY=...    # from your CI's secret store
+$ internetdata db download vpn_ip_v1
 ```
 
 `internetdata login --paste` prompts for one without opening a browser, and `internetdata logout` signs this machine out, which ends the authorization rather than only deleting the local file.
