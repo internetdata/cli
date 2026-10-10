@@ -143,6 +143,29 @@ func TestLoadConfigRefusesToClobberGarbage(t *testing.T) {
 	}
 }
 
+// A save after a load that failed must not write over the file the load could
+// not read: init carries on with an empty config, and the first login or
+// setting saved from it would otherwise replace every stored key with its own.
+func TestSaveConfigKeepsAFileItCannotRead(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	path, err := ConfigPath()
+	if err != nil {
+		t.Fatal(err)
+	}
+	const stored = `{"sessions": {"work": {"key": "k_work"},}}`
+	if err := os.WriteFile(path, []byte(stored), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg := NewConfig()
+	cfg.Sessions["other"] = &Session{Key: "k_other"}
+	if err := SaveConfig(cfg); err == nil {
+		t.Fatal("saved over a config that does not parse")
+	}
+	if body, _ := os.ReadFile(path); string(body) != stored {
+		t.Errorf("the file was rewritten: %q", body)
+	}
+}
+
 // The fingerprint is how `session show` tells two credentials apart, so it has
 // to be stable, wide enough not to collide, and never the key itself.
 func TestKeyFingerprint(t *testing.T) {
