@@ -52,6 +52,11 @@ func cmdWhoami() error {
 	}
 
 	if key == "" {
+		if fJSON {
+			// Standard output is the JSON a script parses, so the notice is an
+			// error: on stdout with a 0 it reads as an answer.
+			return fmt.Errorf("not authenticated; run `%s login`, or set INTERNETDATA_API_KEY", progBase)
+		}
 		fmt.Println("not authenticated")
 		fmt.Printf("\nRun `%s login` to use a key, or `%s signup` to create an account.\n", progBase, progBase)
 		return nil
