@@ -27,9 +27,6 @@ func sessionNames() complete.Predictor {
 	return predict.Func(func(string) []string { return gConfig.SessionNames() })
 }
 
-// jsonFlags are the ones every command with a JSON form takes.
-var jsonFlags = map[string]complete.Predictor{"--json": predict.Nothing, "-j": predict.Nothing}
-
 var completions = &complete.Command{
 	Sub: map[string]*complete.Command{
 		"database": databaseCompletions,
@@ -40,10 +37,12 @@ var completions = &complete.Command{
 			"--session": sessionNames(),
 			"--all":     predict.Nothing,
 		}},
-		"signup":     {Flags: map[string]complete.Predictor{"--no-browser": predict.Nothing}},
-		"session":    sessionCompletions,
-		"sessions":   sessionCompletions,
-		"whoami":     {Flags: jsonFlags},
+		"signup":   {Flags: map[string]complete.Predictor{"--no-browser": predict.Nothing}},
+		"session":  sessionCompletions,
+		"sessions": sessionCompletions,
+		"whoami": {Flags: map[string]complete.Predictor{
+			"--json": predict.Nothing, "-j": predict.Nothing,
+		}},
 		"config":     {Args: predict.Set([]string{"list", "retries="})},
 		"completion": {Args: predict.Set([]string{"install", "uninstall", "bash", "zsh", "fish"})},
 		"version":    {},
@@ -59,19 +58,26 @@ var completions = &complete.Command{
 // cannot drift into offering different subcommands.
 var databaseCompletions = &complete.Command{
 	Sub: map[string]*complete.Command{
-		"list":     {Flags: jsonFlags},
-		"metadata": {},
+		"list": {Flags: map[string]complete.Predictor{
+			"--json": predict.Nothing, "-j": predict.Nothing, "--retries": predict.Something,
+		}},
+		"metadata": {Flags: map[string]complete.Predictor{"--retries": predict.Something}},
 		"checksum": {Flags: map[string]complete.Predictor{
 			"--format": formats, "--json": predict.Nothing, "-j": predict.Nothing,
+			"--retries": predict.Something,
 		}},
-		"url": {Flags: map[string]complete.Predictor{"--format": formats}},
+		"url": {Flags: map[string]complete.Predictor{
+			"--format": formats, "--retries": predict.Something,
+		}},
 		"downloads": {Flags: map[string]complete.Predictor{
 			"--limit": predict.Something, "--json": predict.Nothing, "-j": predict.Nothing,
+			"--retries": predict.Something,
 		}},
 		"download": {Flags: map[string]complete.Predictor{
 			"--format":    formats,
 			"--stdout":    predict.Nothing,
 			"--no-verify": predict.Nothing,
+			"--retries":   predict.Something,
 		}},
 	},
 }
