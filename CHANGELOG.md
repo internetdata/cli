@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.4.1 - 2026-10-11
+
+### Fixes
+
+- Complete --retries for database's subcommands ([`4578453`](https://github.com/internetdata/cli/commit/4578453f8b5ca9c5a9946d946b5853e1f8c6b792))
+
 ## 1.4.0 - 2026-10-10
 
 ### Breaking changes
