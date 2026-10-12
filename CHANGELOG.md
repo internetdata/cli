@@ -2,6 +2,13 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.4.2 - 2026-10-12
+
+### Fixes
+
+- Take libgo-complete v1.0.2: offer options again after a boolean flag ([`f2c7776`](https://github.com/internetdata/cli/commit/f2c77760b2cc465359e7a409feefcb233c0a5390))
+- Take sdk-go v2.6.3: refuse a key holding a control character ([`9f36309`](https://github.com/internetdata/cli/commit/9f36309c09e59cf67b02931f40dae809d2039a24))
+
 ## 1.4.1 - 2026-10-11
 
 ### Fixes
