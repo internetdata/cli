@@ -180,7 +180,7 @@ $ internetdata db list
 ID            NAME      LICENSE   STANDING    TERM
 vpn_ip_v1     VPN IP    standard  licensed    renews 2027-01-04
 bogon_ip_v1   Bogon IP  standard  licensed
-tor_ip_v1     Tor IP              unlicensed
+cdn_ip_v1     CDN IP              unlicensed
 
 $ internetdata db metadata vpn_ip_v1
 $ internetdata db checksum vpn_ip_v1 --format mmdb
@@ -190,7 +190,7 @@ $ curl -fL "$(internetdata db url vpn_ip_v1)" -o vpn_ip_v1.csv.gz
 $ internetdata db downloads
 ```
 
-The Open databases, `tor_ip_v1` among them, download with any organization's key, under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). `db list --json` marks each one `"open": true`.
+Every organization holds a standard license to the Open databases, `bogon_ip_v1` and `tor_ip_v1` among them, which are free under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). `db list --json` marks each one `"open": true`.
 
 `metadata` carries the columns, the row count, the build date and the size of each file without downloading anything. Downloads are verified against the published sha256 and land through a `.part` file, so an interrupted transfer never leaves a truncated file that reads as a whole database. `db url` hands back a time-limited link that carries no API key, for a downloader or another machine. `db downloads` lists your organization's recent download attempts, refusals included, and marks the download of an evaluation sample `(sample)` beside its database.
 
