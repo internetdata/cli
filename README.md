@@ -169,7 +169,7 @@ vpn_ip     licensed  standard  renews 2027-01-04
 bogon_ip   licensed  standard
 ```
 
-The databases listed are the ones your organization holds a license for, current or lapsed; `--json` prints them as JSON.
+The databases listed are the ones your organization holds a license for, current, lapsed or yet to start; `--json` prints them as JSON. A license signed ahead of its start date reads `expired` until then, and its TERM says when it starts.
 
 ### Databases
 

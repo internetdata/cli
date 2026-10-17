@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"text/tabwriter"
+	"time"
 
 	"github.com/spf13/pflag"
 
@@ -17,8 +18,8 @@ func printHelpWhoami() {
 
 Description:
   Which credential this machine uses, and the databases its organization holds
-  a license for, current or lapsed. '%[1]s db list' shows the rest of the
-  catalog too.
+  a license for, current, lapsed or yet to start. '%[1]s db list' shows the
+  rest of the catalog too.
 
 Examples:
   $ %[1]s whoami
@@ -102,8 +103,9 @@ func cmdWhoami() error {
 	fmt.Println()
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "DATABASE\tSTANDING\tLICENSE\tTERM")
+	now := time.Now()
 	for _, d := range held {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", d.Base, d.Standing, licenseType(d), licenseTerm(d))
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", d.Base, d.Standing, licenseType(d), licenseTerm(d, now))
 	}
 	return w.Flush()
 }
