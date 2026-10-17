@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.4.3 - 2026-10-17
+
+### Fixes
+
+- Show a license that has not started yet by its start date, not as lapsed ([`13ae62d`](https://github.com/internetdata/cli/commit/13ae62ddcc0f50944ef05d57c181846a07740437))
+
 ## 1.4.2 - 2026-10-12
 
 ### Fixes
