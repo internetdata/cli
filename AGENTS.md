@@ -33,7 +33,7 @@ and `go install` were each verified installing 1.4.3. The tap's formula names
 1.4.3 with the release's own checksums; 1.0.0 was installed from it (`brew
 trust` then `brew install`, Homebrew 7.0.4 on Linux). Chocolatey approved every
 version through 1.4.3, so the README names `choco install`; a new version waits
-in moderation for a human, 1.4.3 for under 40 minutes.
+in moderation for a human, 1.4.3 for 41 minutes.
 winget's first manifest is microsoft/winget-pkgs#441588, as `InternetData.CLI`
 (the `Mslm.InternetData` PR was withdrawn unmerged, 2026-09-26), still open with
 validation passed on 2026-10-17, and the README names winget once it installs.
