@@ -70,8 +70,8 @@ Binaries are published for 23 platform and architecture pairs on the [releases p
 
 ```bash
 # Linux amd64; for Windows use ".zip" instead of ".tar.gz"
-curl -LO https://github.com/internetdata/cli/releases/download/v1.4.3/internetdata_1.4.3_linux_amd64.tar.gz
-tar -xzf internetdata_1.4.3_linux_amd64.tar.gz
+curl -LO https://github.com/internetdata/cli/releases/download/v1.4.4/internetdata_1.4.4_linux_amd64.tar.gz
+tar -xzf internetdata_1.4.4_linux_amd64.tar.gz
 sudo mv internetdata /usr/local/bin/
 ```
 
