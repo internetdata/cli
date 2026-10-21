@@ -25,18 +25,19 @@ lookup, result cache or field selection.
 - **No color.** Nothing prints any, so there is no `--nocolor` and no
   `fatih/color`.
 
-## Channel state (2026-10-20, v1.4.4)
+## Channel state (2026-10-21, v1.4.5)
 
 GitHub release (its notes are the version's CHANGELOG.md section), ghcr
 (public, anonymous pull), apt (`apt.internetdata.io`, a clean bookworm install)
-and `go install` were each verified installing 1.4.4. The tap's formula names
-1.4.4 with the release's own checksums; 1.0.0 was installed from it (`brew
-trust` then `brew install`, Homebrew 7.0.4 on Linux). Chocolatey approved every
-version through 1.4.3, so the README names `choco install`; each new version
-waits in moderation for a human (1.4.3 for 41 minutes), 1.4.4 since its push.
-winget's first manifest is microsoft/winget-pkgs#441588, as `InternetData.CLI`
-(the `Mslm.InternetData` PR was withdrawn unmerged, 2026-09-26), open and
-labeled `Validation-Completed` on 2026-10-20; the README names winget once it installs.
-Until that PR merges every release's `winget` job is red by design: the org's
-`WINGET_TOKEN` already reaches this repo, and winget-releaser only bumps a
-package that exists.
+and `go install` were each verified installing 1.4.5. The tap's formula names
+1.4.5 with the release's own checksums; 1.0.0 was installed from it (`brew
+trust` then `brew install`, Homebrew 7.0.4 on Linux). The tap's SECURITY.md and
+README are kept by hand: the release job stages only `Formula/`. Chocolatey
+approved every version through 1.4.4, so the README names `choco install`; each
+new version waits in moderation for a human (1.4.4 for 2 h 15 min), 1.4.5 since
+its push. winget's first manifest is microsoft/winget-pkgs#441588, as
+`InternetData.CLI` (the `Mslm.InternetData` PR was withdrawn unmerged,
+2026-09-26), open and labeled `Validation-Completed` on 2026-10-21; the README
+names winget once it installs. Until that PR merges every release's `winget`
+job is red by design: the org's `WINGET_TOKEN` already reaches this repo, and
+winget-releaser only bumps a package that exists.
