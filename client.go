@@ -70,7 +70,8 @@ func resolveRetries() int {
 // The SDK's own message is accurate and says nothing about what to DO, which
 // for the two authentication failures is the entire question. Keys are
 // default-deny, so a valid key without the db.download scope is refused as
-// unauthorized, not as forbidden.
+// unauthorized, not as forbidden. A forbidden is a license, or an address the
+// allowed addresses leave out, and only its code tells them apart.
 func explain(err error) error {
 	var apiErr *internetdata.Error
 	if !errors.As(err, &apiErr) {
@@ -81,6 +82,10 @@ func explain(err error) error {
 		return fmt.Errorf("%w\nthe API key was not accepted, or it lacks the db.download scope; check `%s whoami`",
 			err, progBase)
 	case internetdata.KindForbidden:
+		if apiErr.Message == "IP_NOT_ALLOWED" {
+			return fmt.Errorf("%w\nthe key is fine; its allowed addresses, or its organization's, leave this one out",
+				err)
+		}
 		return fmt.Errorf("%w\nthis organization's license does not cover that; `%s db list` shows what it holds",
 			err, progBase)
 	case internetdata.KindRateLimited:
