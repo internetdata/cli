@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.4.5 - 2026-10-21
+
+### Fixes
+
+- Tell a key refused for its address from a missing license ([`6481765`](https://github.com/internetdata/cli/commit/6481765dfed2d417f5e284fb290bffc00048fa83))
+
 ## 1.4.4 - 2026-10-20
 
 ### Fixes
