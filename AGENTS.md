@@ -25,19 +25,21 @@ lookup, result cache or field selection.
 - **No color.** Nothing prints any, so there is no `--nocolor` and no
   `fatih/color`.
 
-## Channel state (2026-10-23, v1.4.6)
+## Channel state (2026-10-30, v1.4.7)
 
 GitHub release (its notes are the version's CHANGELOG.md section), ghcr
 (public, anonymous pull), apt (`apt.internetdata.io`, a clean bookworm install)
-and `go install` were each verified installing 1.4.6. The tap's formula names
-1.4.6 with the release's own checksums; 1.0.0 was installed from it (`brew
+and `go install` were each verified installing 1.4.7. The tap's formula names
+1.4.7 with the release's own checksums; 1.0.0 was installed from it (`brew
 trust` then `brew install`, Homebrew 7.0.4 on Linux). The tap's SECURITY.md and
 README are kept by hand: the release job stages only `Formula/`. Chocolatey
 approved every version through 1.4.6, so the README names `choco install`; each
 new version waits in moderation for a human (1.4.6 for 4 h 14 min). winget's
 first manifest is microsoft/winget-pkgs#441588, as `InternetData.CLI` (the
-`Mslm.InternetData` PR was withdrawn unmerged, 2026-09-26), still open and
-labeled `Validation-Completed` on 2026-10-23; the README
-names winget once it installs. Until that PR merges every release's `winget`
-job is red by design: the org's `WINGET_TOKEN` already reaches this repo, and
-winget-releaser only bumps a package that exists.
+`Mslm.InternetData` PR was withdrawn unmerged, 2026-09-26), still open. On
+2026-10-30 its moderators' automation refused the manifest schema
+`scripts/winget-new.sh` writes, 1.12.0, asked for 1.28.0 and labeled it
+`Needs-Author-Feedback`, so it closes itself about 2026-11-07 unless updated.
+The README names winget once it installs. Until that PR merges every release's
+`winget` job is red by design: the org's `WINGET_TOKEN` already reaches this
+repo, and winget-releaser only bumps a package that exists.
