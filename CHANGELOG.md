@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.4.7 - 2026-10-30
+
+### Fixes
+
+- Take sdk-go v2.8.4: read a lowercase t or z in a date-time ([`c826c3b`](https://github.com/internetdata/cli/commit/c826c3b179844c2f92bf3430417a5edc31986d15))
+
 ## 1.4.6 - 2026-10-22
 
 ### Fixes
