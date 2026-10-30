@@ -37,9 +37,8 @@ approved every version through 1.4.6, so the README names `choco install`; each
 new version waits in moderation for a human (1.4.6 for 4 h 14 min). winget's
 first manifest is microsoft/winget-pkgs#441588, as `InternetData.CLI` (the
 `Mslm.InternetData` PR was withdrawn unmerged, 2026-09-26), still open. On
-2026-10-30 its moderators' automation refused the manifest schema
-`scripts/winget-new.sh` writes, 1.12.0, asked for 1.28.0 and labeled it
-`Needs-Author-Feedback`, so it closes itself about 2026-11-07 unless updated.
-The README names winget once it installs. Until that PR merges every release's
+2026-10-30 its moderators' automation refused manifest schema 1.12.0 and asked
+for 1.28.0; `WINGET_PR=441588 scripts/winget-new.sh 1.4.7` moved it to 1.4.7 on
+1.28.0 the same day. The README names winget once it installs. Until that PR merges every release's
 `winget` job is red by design: the org's `WINGET_TOKEN` already reaches this
 repo, and winget-releaser only bumps a package that exists.
