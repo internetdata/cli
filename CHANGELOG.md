@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.4.8 - 2026-11-02
+
+### Fixes
+
+- Write ID, not `id`, in the database command's usage ([`b0774e2`](https://github.com/internetdata/cli/commit/b0774e2724510f7a1e692e45baadfe6b89d5842e))
+
 ## 1.4.7 - 2026-10-30
 
 ### Fixes
