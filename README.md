@@ -173,7 +173,7 @@ The databases listed are the ones your organization holds a license for, current
 
 ### Databases
 
-A license covers a database family, and a download names one of its versions, so the ids below come from `db list`:
+A license covers a database family, and a download names one of its versions, so the IDs below come from `db list`:
 
 ```console
 $ internetdata db list
