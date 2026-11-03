@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.4.9 - 2026-11-03
+
+### Fixes
+
+- Take sdk-go v2.8.5: refuse a sign-in answer holding a null ([`b5bcf41`](https://github.com/internetdata/cli/commit/b5bcf41518398082046939e0f312ea209a43d4e7))
+
 ## 1.4.8 - 2026-11-02
 
 ### Fixes
