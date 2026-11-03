@@ -25,17 +25,17 @@ lookup, result cache or field selection.
 - **No color.** Nothing prints any, so there is no `--nocolor` and no
   `fatih/color`.
 
-## Channel state (2026-11-02, v1.4.8)
+## Channel state (2026-11-03, v1.4.9)
 
 GitHub release (its notes are the version's CHANGELOG.md section), ghcr
 (public, anonymous pull), apt (`apt.internetdata.io`, a clean bookworm install)
-and `go install` were each verified serving 1.4.8. The tap's formula names
-1.4.8 with the release's own checksums; 1.0.0 was installed from it (`brew
+and `go install` were each verified serving 1.4.9. The tap's formula names
+1.4.9 with the release's own checksums; 1.0.0 was installed from it (`brew
 trust` then `brew install`, Homebrew 7.0.4 on Linux). The tap's SECURITY.md and
 README are kept by hand: the release job stages only `Formula/`. Chocolatey
-approved every version through 1.4.7, so the README names `choco install`; each
-new version waits in moderation for a human (1.4.7 for 4 h 18 min), and 1.4.8
-went in on 2026-11-02. winget's first manifest is microsoft/winget-pkgs#441588,
+approved every version through 1.4.8, so the README names `choco install`; each
+new version waits in moderation for a human (1.4.8 for 40 min), and 1.4.9
+went in on 2026-11-03. winget's first manifest is microsoft/winget-pkgs#441588,
 as `InternetData.CLI`, holding 1.4.7 on manifest schema 1.28.0: it passed
 validation on 2026-10-30 and waits for a moderator. The README names winget
 once it installs. Until that PR merges every release's `winget` job is red by
