@@ -41,6 +41,12 @@ curl -Ls https://github.com/internetdata/cli/releases/latest/download/deb.sh | s
 ### Windows
 
 ```powershell
+winget install InternetData.CLI
+```
+
+Or with Chocolatey:
+
+```powershell
 choco install internetdata
 ```
 
