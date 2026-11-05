@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.4.10 - 2026-11-05
+
+### Fixes
+
+- Check a download against the checksum taken before it, not after ([`c2d6259`](https://github.com/internetdata/cli/commit/c2d6259c44c26c92c3bb1ff0698a9ce5ae4b478e))
+
 ## 1.4.9 - 2026-11-03
 
 ### Fixes
