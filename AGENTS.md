@@ -37,6 +37,5 @@ approved every version through 1.4.11, each after a human's review. winget took
 its first version, 1.4.7 as `InternetData.CLI`, on 2026-11-03
 (microsoft/winget-pkgs#441588), and its index resolves it, so the README names
 `winget install`. Every later version is the release's `winget` job, which must
-go green and, from 1.4.12, posts the CLA agree its PR needs. 1.4.10 merged on
-2026-11-06 (#472065); 1.4.11's #472097 took its agree by hand and waits for a
-moderator.
+go green and, from 1.4.12, posts the CLA agree its PR needs. 1.4.10 (#472065)
+and 1.4.11 (#472097, its agree posted by hand) merged on 2026-11-06.
