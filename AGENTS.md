@@ -25,19 +25,18 @@ lookup, result cache or field selection.
 - **No color.** Nothing prints any, so there is no `--nocolor` and no
   `fatih/color`.
 
-## Channel state (2026-11-04, v1.4.9)
+## Channel state (2026-11-06, v1.4.11)
 
 GitHub release (its notes are the version's CHANGELOG.md section), ghcr
 (public, anonymous pull), apt (`apt.internetdata.io`, a clean bookworm install)
-and `go install` were each verified serving 1.4.9. The tap's formula names
-1.4.9 with the release's own checksums; 1.0.0 was installed from it (`brew
+and `go install` were each verified serving 1.4.11. The tap's formula names
+1.4.11 with the release's own checksums; 1.0.0 was installed from it (`brew
 trust` then `brew install`, Homebrew 7.0.4 on Linux). The tap's SECURITY.md and
 README are kept by hand: the release job stages only `Formula/`. Chocolatey
-approved every version through 1.4.9, each after a human's review (1.4.8 in 40
-min, 1.4.9 in 3 h 47 min). winget took its first version, 1.4.7 as
-`InternetData.CLI`, on 2026-11-03 (microsoft/winget-pkgs#441588), and its index
-resolves it, so the README names `winget install`. Every later version is the
-release's `winget` job, which must go green: 1.4.9's read the package, then
-could not create its branch on the org fork (`does not have the correct
-permissions to execute CreateRef`), so winget serves 1.4.7 until the org's
-`WINGET_TOKEN` can write there.
+approved every version through 1.4.11, each after a human's review. winget took
+its first version, 1.4.7 as `InternetData.CLI`, on 2026-11-03
+(microsoft/winget-pkgs#441588), and its index resolves it, so the README names
+`winget install`. Every later version is the release's `winget` job, which must
+go green and, from 1.4.12, posts the CLA agree its PR needs. 1.4.10 merged on
+2026-11-06 (#472065); 1.4.11's #472097 took its agree by hand and waits for a
+moderator.
