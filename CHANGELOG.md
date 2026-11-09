@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.4.12 - 2026-11-09
+
+### Fixes
+
+- Take libgo-complete v1.0.3: keep other zsh completions on uninstall ([`0b37a52`](https://github.com/internetdata/cli/commit/0b37a52ed08d6ca779e5da1a6a15ec09a21b263b))
+
 ## 1.4.11 - 2026-11-06
 
 ### Fixes
