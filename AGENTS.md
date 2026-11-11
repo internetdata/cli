@@ -25,19 +25,19 @@ lookup, result cache or field selection.
 - **No color.** Nothing prints any, so there is no `--nocolor` and no
   `fatih/color`.
 
-## Channel state (2026-11-10, v1.4.12)
+## Channel state (2026-11-11, v1.4.13)
 
 GitHub release (its notes are the version's CHANGELOG.md section), ghcr
 (public, anonymous pull), apt and `go install` were each verified serving
-1.4.12. apt is signed since 2026-11-10: `InRelease`, `Release.gpg` and
+1.4.13. apt is signed since 2026-11-10: `InRelease`, `Release.gpg` and
 `public.key` (fingerprint `590AB7732517F95B056ED35317EA110D248C1B73`), and the
 README installs it with `signed-by`, proved on bookworm and Ubuntu 24.04. The
-tap's formula names 1.4.12 with the release's own checksums; 1.0.0 was
+tap's formula names 1.4.13 with the release's own checksums; 1.0.0 was
 installed from it (`brew trust` then `brew install`, Homebrew 7.0.4 on Linux).
 The tap's SECURITY.md and README are kept by hand: the release job stages only
 `Formula/`. Chocolatey approved every version through 1.4.12, each after a
-human's review. winget took its first version, 1.4.7 as `InternetData.CLI`, on
-2026-11-03 (microsoft/winget-pkgs#441588), and every later one is the
-release's `winget` job, which must go green; 1.4.12 (#475319) merged on
-2026-11-09. The job posts the CLA agree when a PR reads `Needs-CLA`, which
-1.4.12's never did.
+human's review; 1.4.13 is in moderation. winget took its first version, 1.4.7
+as `InternetData.CLI`, on 2026-11-03 (microsoft/winget-pkgs#441588), and every
+later one is the release's `winget` job, which must go green; 1.4.12 (#475319)
+merged on 2026-11-09, and 1.4.13 (#477393) is open. The job posts the CLA
+agree when a PR reads `Needs-CLA`, which none since 1.4.12 has.
