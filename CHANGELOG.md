@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.4.13 - 2026-11-11
+
+### Fixes
+
+- Build on Go 1.27.4, which fixes GO-2026-6859 in net/http ([`636cbbb`](https://github.com/internetdata/cli/commit/636cbbb41ebde64cd3f04640f36cf3f1c839744a))
+
 ## 1.4.12 - 2026-11-09
 
 ### Fixes
