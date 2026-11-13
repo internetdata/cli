@@ -2,6 +2,17 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.5.0 - 2026-11-13
+
+### Breaking changes
+
+- whoami: the plan behind the key and what it has used ([`0de94bf`](https://github.com/internetdata/cli/commit/0de94bf1d2626f87e6bfef96e8a424d21b7b924b))
+
+### Features
+
+- Take sdk-go v2.10.0: talk to api.internetdata.io, sign in at the apex ([`2dcc2a1`](https://github.com/internetdata/cli/commit/2dcc2a1fc46891e9cbeba00e13fbf3492f879a23))
+- Look up an address, an AS or a domain, one or millions, and your own ([`14427b2`](https://github.com/internetdata/cli/commit/14427b2bb6e0d6c6762fceb04d59ec3387ced998))
+
 ## 1.4.14 - 2026-11-13
 
 ### Fixes
