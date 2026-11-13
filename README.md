@@ -298,21 +298,25 @@ $ internetdata --session work 146.70.116.130    # one command, without switching
 
 A key can also come from `--key` or the `INTERNETDATA_API_KEY` environment variable, in that order of precedence. The config file is written `0600` inside a `0700` directory.
 
-### Who am I
+### Plan and usage
 
 ```console
 $ internetdata whoami
 key          mk_1************************abcd
 from         session default
-session      default
 api          https://api.internetdata.io
+org          85bb51e4-2eb6-4a31-8e4d-02ba8b98fe61
 
-DATABASE   STANDING  LICENSE   TERM
-vpn_ip     licensed  standard  renews 2027-01-04
-bogon_ip   licensed  standard
+plan         max
+fields       max tier
+
+used         412,908 of 5,000,000
+             [###                                     ] 8.3%
+hard limit   none; requests above the quota are billed as overage
+resets       2026-10-04T07:00:00Z (in 20d)
 ```
 
-The databases listed are the ones your organization holds a license for, current, lapsed or yet to start; `--json` prints them as JSON. A license signed ahead of its start date reads `expired` until then, and its TERM says when it starts.
+Also spelled `entitlement`. Usage counts against the anniversary of your subscription, not the calendar month and not the billing period, and it is the same number a lookup is gated on.
 
 ### Databases
 

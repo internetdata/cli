@@ -58,7 +58,7 @@ func main() {
 		err = cmdLogout()
 	case "session", "sessions":
 		err = cmdSession()
-	case "whoami":
+	case "whoami", "entitlement":
 		err = cmdWhoami()
 	case "database", "db":
 		err = cmdDatabase()
@@ -89,7 +89,7 @@ func main() {
 // subcommands is every command name, including aliases.
 var subcommands = map[string]bool{
 	"myip": true, "bulk": true, "signup": true, "login": true, "init": true, "logout": true,
-	"session": true, "sessions": true, "whoami": true,
+	"session": true, "sessions": true, "whoami": true, "entitlement": true,
 	"database": true, "db": true, "cache": true, "config": true,
 	"completion": true, "version": true, "vsn": true, "v": true,
 }

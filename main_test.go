@@ -51,7 +51,7 @@ func TestDetectCommand(t *testing.T) {
 		{[]string{"internetdata", "example.com", "version"}, ""},
 
 		// Aliases.
-		{[]string{"internetdata", "init"}, "init"},
+		{[]string{"internetdata", "entitlement"}, "entitlement"},
 		{[]string{"internetdata", "vsn"}, "vsn"},
 		{[]string{"internetdata", "v"}, "v"},
 	}
