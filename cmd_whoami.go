@@ -37,7 +37,7 @@ Options:
 func cmdWhoami() error {
 	var fJSON bool
 	globalFlags()
-	apiFlags()
+	lookupFlags()
 	pflag.BoolVarP(&fJSON, "json", "j", false, "output JSON.")
 	parseSubFlags()
 
@@ -67,6 +67,7 @@ func cmdWhoami() error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	// The credential first, because "which key am I even using" is the question
 	// that brings most people here - and it is answered even when the API then
@@ -84,7 +85,7 @@ func cmdWhoami() error {
 	// databases its organization holds, which the catalog says beside each one.
 	databases, err := client.Database().List(context.Background())
 	if err != nil {
-		return explain(err)
+		return explainDatabase(err)
 	}
 	held := make([]internetdata.Database, 0, len(databases))
 	for _, d := range databases {

@@ -73,7 +73,7 @@ func cmdDatabase() error {
 		fNoVerify bool
 	)
 	globalFlags()
-	apiFlags()
+	lookupFlags()
 	pflag.StringVar(&fFormat, "format", string(internetdata.FormatCSVGZ), "which published file.")
 	pflag.BoolVarP(&fJSON, "json", "j", false, "output JSON.")
 	pflag.IntVar(&fLimit, "limit", 0, "how many download records to show.")
@@ -90,6 +90,7 @@ func cmdDatabase() error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 	if err := client.requireKey("a database command"); err != nil {
 		return err
 	}
@@ -137,7 +138,7 @@ func cmdDatabase() error {
 func dbList(ctx context.Context, db *internetdata.DatabaseAPI, asJSON bool) error {
 	items, err := db.List(ctx)
 	if err != nil {
-		return explain(err)
+		return explainDatabase(err)
 	}
 	if asJSON {
 		return emitJSON(items)
@@ -199,7 +200,7 @@ func licenseTerm(d internetdata.Database, now time.Time) string {
 func dbMetadata(ctx context.Context, db *internetdata.DatabaseAPI, id string) error {
 	meta, err := db.Metadata(ctx, id)
 	if err != nil {
-		return explain(err)
+		return explainDatabase(err)
 	}
 	return emitJSON(meta)
 }
@@ -207,7 +208,7 @@ func dbMetadata(ctx context.Context, db *internetdata.DatabaseAPI, id string) er
 func dbChecksum(ctx context.Context, db *internetdata.DatabaseAPI, id, format string, asJSON bool) error {
 	sums, err := db.Checksums(ctx, id, internetdata.Format(format))
 	if err != nil {
-		return explain(err)
+		return explainDatabase(err)
 	}
 	if asJSON {
 		return emitJSON(sums)
@@ -228,7 +229,7 @@ func dbChecksum(ctx context.Context, db *internetdata.DatabaseAPI, id, format st
 func dbURL(ctx context.Context, db *internetdata.DatabaseAPI, id, format string) error {
 	url, err := db.DownloadURL(ctx, id, internetdata.Format(format))
 	if err != nil {
-		return explain(err)
+		return explainDatabase(err)
 	}
 	fmt.Println(url)
 	return nil
@@ -237,7 +238,7 @@ func dbURL(ctx context.Context, db *internetdata.DatabaseAPI, id, format string)
 func dbDownloads(ctx context.Context, db *internetdata.DatabaseAPI, limit int, asJSON bool) error {
 	items, err := db.Downloads(ctx, limit)
 	if err != nil {
-		return explain(err)
+		return explainDatabase(err)
 	}
 	if asJSON {
 		return emitJSON(items)
@@ -281,7 +282,7 @@ func dbDownload(
 		// buffering a multi-gigabyte file to hash it would defeat the point.
 		n, err := db.Download(ctx, id, f, os.Stdout)
 		if err != nil {
-			return explain(err)
+			return explainDatabase(err)
 		}
 		fmt.Fprintf(os.Stderr, "%s written\n", humanBytes(n))
 		return nil
@@ -302,7 +303,7 @@ func dbDownload(
 	fmt.Fprintf(os.Stderr, "downloading %s (%s) to %s...\n", id, format, out)
 	n, err := db.DownloadFile(ctx, id, f, out)
 	if err != nil {
-		return explain(err)
+		return explainDatabase(err)
 	}
 	fmt.Fprintf(os.Stderr, "%s written\n", humanBytes(n))
 
@@ -312,7 +313,7 @@ func dbDownload(
 	if sumsErr != nil {
 		// The file is on disk and intact as far as we know; failing the command
 		// over an unavailable checksum would throw away a good download.
-		fmt.Fprintf(os.Stderr, "warn: could not fetch checksums to verify: %v\n", explain(sumsErr))
+		fmt.Fprintf(os.Stderr, "warn: could not fetch checksums to verify: %v\n", explainDatabase(sumsErr))
 		return nil
 	}
 	if sums.SHA256 == "" {
@@ -356,20 +357,6 @@ func sha256File(path string) (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(h.Sum(nil)), nil
-}
-
-// humanBytes renders a byte count for a person.
-func humanBytes(n int64) string {
-	const unit = 1024
-	if n < unit {
-		return fmt.Sprintf("%d B", n)
-	}
-	div, exp := int64(unit), 0
-	for m := n / unit; m >= unit; m /= unit {
-		div *= unit
-		exp++
-	}
-	return fmt.Sprintf("%.1f %cB", float64(n)/float64(div), "KMGTPE"[exp])
 }
 
 // emitJSON prints a value indented, which is how this API's own responses are

@@ -5,11 +5,11 @@
 
 The official command line interface for the [InternetData](https://internetdata.io) API.
 
-List the IP and network databases your organization is licensed for, see what is inside one before you fetch it, and download it in CSV.GZ or MMDB, verified against its published checksum.
+Look up what every InternetData database says about an IP address - where it is, the AS and company behind it, its abuse contact, whether it is a VPN, a proxy, a Tor exit, a relay, or a hosting, CDN, carrier or satellite network, and what it runs - one address at a time or a few million, look up an AS or a domain, and download the databases.
 
 ## Getting Started
 
-Every database command needs an API key carrying the `db.download` scope. `internetdata login` signs this machine in through your browser and stores one.
+No account is needed to start: Unlimited, the free plan, answers any address with no cap, with a key or without one: where it is, the AS and company behind it, its abuse contact, and whether it is a Tor exit, a relay, anycast, a carrier or satellite network, or runs SSH, SMTP, a web server, a DNS resolver or BitTorrent, one address per request. Every paid plan answers all our data fields and looks addresses up in batches of up to 1,000, and a free account tries every field, 100 lookups a day.
 
 ### macOS
 
@@ -63,7 +63,7 @@ iwr -useb https://github.com/internetdata/cli/releases/latest/download/windows.p
 ### Docker
 
 ```bash
-docker run --rm -e INTERNETDATA_API_KEY ghcr.io/internetdata/cli db list
+docker run --rm ghcr.io/internetdata/cli 146.70.116.130
 ```
 
 ### Using `go install`
@@ -111,13 +111,14 @@ Invoking the CLI with nothing shows what it can do:
 
 ```console
 $ internetdata
-Usage: internetdata <cmd> [<opts>] [<args>]
+Usage: internetdata <ip | cidr | range | file | as | domain>... [<opts>]
+       internetdata <cmd> [<opts>] [<args>]
 ...
 ```
 
 ### Login
 
-`internetdata login` opens your browser, you confirm a short code, and you pick which of your API keys this machine should hold:
+You can use the CLI without an account, but a key widens the answer and raises your allowance. `internetdata login` opens your browser, you confirm a short code, and you pick which of your API keys this machine should hold:
 
 ```console
 $ internetdata login
@@ -139,10 +140,142 @@ For a CI job, set `INTERNETDATA_API_KEY` in the job's environment from your CI's
 
 ```console
 $ export INTERNETDATA_API_KEY=...
-$ internetdata db download vpn_ip_v1
+$ internetdata 146.70.116.130
 ```
 
 `internetdata login --paste` prompts for one without opening a browser, and `internetdata logout` signs this machine out, which ends the authorization rather than only deleting the local file.
+
+### My IP
+
+```console
+$ internetdata myip -f ip,location.country
+ip                146.70.116.130
+location.country  AT
+```
+
+This is the address our edge observed, so behind a proxy or a VPN it reports the exit you left through.
+
+### Any IP
+
+```console
+$ internetdata 146.70.116.130
+ip                        146.70.116.130
+is_bogon                  false
+is_tor                    false
+is_relay                  false
+is_anycast                false
+is_carrier                false
+is_satellite              false
+is_ssh                    false
+is_smtp                   false
+is_web                    false
+is_dns_resolver           false
+is_bittorrent             false
+tor                       {}
+relay                     {}
+location.continent        EU
+location.continent_name   Europe
+location.country          AT
+location.country_name     Austria
+location.timezone         Europe/Vienna
+location.currency_code    EUR
+location.currency_name    Euro
+location.currency_symbol  €
+location.flag_emoji       🇦🇹
+location.flag_unicode     U+1F1E6 U+1F1F9
+asn.asn                   9009
+asn.name                  M247 Europe SRL
+asn.domain                m247global.com
+asn.type                  hosting
+asn.prefix                146.70.116.0/24
+company.name              M247 LTD Vienna Infrastructure
+company.domain            m247.ro
+abuse.email               abuse@m247.ro
+hostname                  ""
+```
+
+That is Unlimited's answer, without a key. A paid plan adds `is_vpn`, `is_hosting`, `is_cdn` and the four proxy flags, the provider and confidence behind each flag, what each service answered, the location down to the city, and the whois records.
+
+Private, reserved and documentation addresses are answered locally without a request, so they cost nothing and work offline.
+
+### An AS or a domain
+
+```console
+$ internetdata AS9009
+asn        9009
+name       M247 Europe SRL
+country    RO
+registry   ripe
+allocated  2005-06-06
+domain     m247global.com
+
+$ internetdata example.com
+domain         example.com
+is_registered  true
+has_a          true
+has_aaaa       true
+has_mx         true
+has_ns         true
+has_cname      false
+```
+
+Every plan answers an AS's registration, and whether a domain is registered and which record types it has. A paid plan adds the AS's whois record and the prefixes it announces, and the domain's records, its organization's IP ranges and `is_disposable`. Each is one request, never cached or batched, and is typed as an argument: a list, piped or in a file, is read for addresses. An AS or a domain beside addresses is answered after them.
+
+### Piping
+
+Addresses can come from standard input, and from arguments, at the same time:
+
+```console
+$ cat addresses.txt | internetdata
+$ internetdata 1.1.1.1 8.8.8.0/24 9.9.9.1-9.9.9.9 addresses.txt
+```
+
+Anything resolving to more than one answer prints JSON keyed by what was looked up; a single answer prints the readable block. That follows the resolved **count**, so `10.0.0.1/32` is one and `10.0.0.0/30` is four.
+
+### Field filter
+
+```console
+$ internetdata 146.70.116.130 -f location.country
+location.country  AT
+
+$ internetdata 146.70.116.130 -f location.country,asn.name
+location.country  AT
+asn.name          M247 Europe SRL
+
+$ internetdata 146.70.116.130 -f location          # the whole object
+```
+
+It applies to every format. JSON, JSON Lines and YAML keep the answer's nesting, and leave out a field the answer does not carry:
+
+```console
+$ internetdata bulk 146.70.116.130 1.1.1.1 --jsonl -f ip,is_tor,asn.name
+{"asn":{"name":"M247 Europe SRL"},"ip":"146.70.116.130","is_tor":false}
+{"asn":{"name":"Cloudflare, Inc."},"ip":"1.1.1.1","is_tor":false}
+```
+
+An AS's and a domain's fields are their own, as `internetdata AS9009 -f name,registry`.
+
+### Bulk
+
+`bulk` always prints the machine format, whatever the count, which is what a script wants:
+
+```console
+$ internetdata bulk 8.8.8.0/24 --csv > answers.csv
+$ internetdata bulk addresses.txt --jsonl | jq -r 'select(.is_tor) | .ip'
+```
+
+Bulk runs stream: nothing is held in memory beyond one batch, so a `/8` is a long command rather than an impossible one, and output starts immediately. With no arguments at a terminal it reads addresses you type, one per line, ending at a blank line.
+
+Output formats are `--pretty`, `--json`, `--jsonl`, `--csv` and `--yaml`. A CSV holds one kind of answer, so look addresses, AS numbers and domains up in separate runs for it.
+
+### Exit status
+
+A lookup exits 1 when anything could not be answered, and 0 when everything was. Whatever went wrong - a key the API refused, a spent allowance, the API out of reach - that address, AS or domain gets its error in the output, in place of its answer, and everything else is answered as usual. A script that can live with gaps adds `|| true` and finds them in the output:
+
+```console
+$ internetdata bulk addresses.txt --jsonl > answers.jsonl || true
+$ jq -r 'select(.error) | .ip' answers.jsonl
+```
 
 ### Sessions
 
@@ -158,7 +291,7 @@ $ internetdata session list
    work     mk_9***************wxyz  default                  never
 
 $ internetdata session use work
-$ internetdata --session work db list    # one command, without switching
+$ internetdata --session work 146.70.116.130    # one command, without switching
 ```
 
 `--base-url` points a session at another deployment of the API; a session without one talks to `https://api.internetdata.io`, and signs in at `https://internetdata.io`.
@@ -183,7 +316,7 @@ The databases listed are the ones your organization holds a license for, current
 
 ### Databases
 
-A license covers a database family, and a download names one of its versions, so the IDs below come from `db list`:
+The same data, published as files you host yourself. A download needs a key carrying the `db.download` scope; a key without it still looks addresses up. A license covers a database family, and a download names one of its versions, so the IDs below come from `db list`:
 
 ```console
 $ internetdata db list
@@ -214,7 +347,7 @@ zsh
 fish
 ```
 
-It completes commands, flags, the values flags take, and the session names this machine actually holds.
+It completes commands, flags, the values flags take, field names, and the session names this machine actually holds.
 
 NOTE: it may work for other shells as well, because the implementation is in Go and is not shell-specific.
 
@@ -248,6 +381,48 @@ internetdata completion fish
 If your shell is not listed here, you can open an issue.
 
 Note that as long as the `COMP_LINE` environment variable is provided to the binary itself, it will output completion results. So if your shell provides a way to pass `COMP_LINE` on auto-completion attempts to a binary, then have your shell do that with the `internetdata` binary itself.
+
+## Data
+
+How much you get back per lookup depends on the plan behind your key. See the [plans](https://internetdata.io/pricing) for what each includes. The examples in this document use no key.
+
+**A field your plan does not include is missing from the answer, not `false`.** `is_vpn` absent means it is not in your plan; `is_vpn: false` means we checked and it is not a VPN. The readable output prints only what you were served; CSV writes an empty cell for absent and the literal `false` for false. `--show-absent` renders the lot.
+
+On a key with no paid plan, each answer carries `trial_expired`: `false` for the day's 100 full lookups, `true` once they're spent and the answer is Unlimited's. `internetdata whoami` counts them.
+
+## Caching
+
+Address answers are cached on disk, so looking the same address up twice costs one request rather than two. An AS or a domain is never cached.
+
+```bash
+internetdata cache info
+internetdata cache clear
+internetdata --nocache 146.70.116.130
+internetdata config list
+internetdata config cache=disable cache_ttl=24h
+```
+
+Entries are partitioned by **credential**, because which fields an answer carries depends on the plan behind the key - one key's answers are never served to another's. Clearing empties every partition.
+
+## Color Output
+
+### Disabling color output
+
+The CLI respects either the `--nocolor` flag or the [`NO_COLOR`](https://no-color.org/) environment variable to disable color output.
+
+### Color on Windows
+
+To enable color support for the Windows command prompt, run the following to enable [`Console Virtual Terminal Sequences`](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences):
+
+```cmd
+REG ADD HKCU\CONSOLE /f /v VirtualTerminalLevel /t REG_DWORD /d 1
+```
+
+You can disable this by running the following:
+
+```cmd
+REG DELETE HKCU\CONSOLE /f /v VirtualTerminalLevel
+```
 
 ## Other Libraries
 

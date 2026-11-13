@@ -1,0 +1,448 @@
+package lib
+
+import (
+	"encoding/csv"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"strconv"
+	"strings"
+
+	"github.com/fatih/color"
+	"gopkg.in/yaml.v3"
+)
+
+// Format is an output shape.
+type Format string
+
+const (
+	// FormatPretty is the human-readable block, and the default for one answer.
+	FormatPretty Format = "pretty"
+	// FormatJSON is one object keyed by what was looked up, and the default for
+	// many.
+	FormatJSON Format = "json"
+	// FormatJSONL is one object per line, for pipelines.
+	FormatJSONL Format = "jsonl"
+	FormatCSV   Format = "csv"
+	FormatYAML  Format = "yaml"
+)
+
+// ParseFormat resolves a --format value.
+func ParseFormat(s string) (Format, error) {
+	switch strings.ToLower(strings.TrimSpace(s)) {
+	case "", "pretty":
+		return FormatPretty, nil
+	case "json":
+		return FormatJSON, nil
+	case "jsonl", "ndjson":
+		return FormatJSONL, nil
+	case "csv":
+		return FormatCSV, nil
+	case "yaml", "yml":
+		return FormatYAML, nil
+	}
+	return "", fmt.Errorf("unknown format %q; want pretty, json, jsonl, csv or yaml", s)
+}
+
+// Opts tunes how answers are rendered.
+type Opts struct {
+	// Fields selects specific dotted fields. Empty means all of them.
+	Fields []string
+	// ShowAbsent renders the fields this plan does not include, rather than
+	// omitting them.
+	ShowAbsent bool
+	// Color enables ANSI color in the pretty format.
+	Color bool
+}
+
+// Writer streams answers in one format.
+//
+// Streaming rather than collecting, because bulk output is unbounded: a run
+// over a /16 must start printing immediately and must never hold every answer
+// to serialize them at the end.
+type Writer interface {
+	// Write emits one answer about key, an address, an AS or a domain, as kind
+	// says.
+	Write(kind Kind, key string, v any) error
+	// WriteError emits one failure, so a bad entry appears in the output next to
+	// the good ones instead of vanishing.
+	WriteError(kind Kind, key string, err error) error
+	// Close finishes the stream: the closing brace, the final flush.
+	Close() error
+}
+
+// ErrMixedCSV refuses a second kind of answer in one CSV, whose header is the
+// first kind's columns.
+var ErrMixedCSV = errors.New(
+	"CSV holds one kind of answer; look addresses, AS numbers and domains up in separate runs")
+
+// keyValue is what an error's line names in key's field: the number, for an AS,
+// as its answer does, and key itself otherwise.
+func keyValue(kind Kind, key string) any {
+	if kind == KindASN {
+		if n, err := strconv.ParseUint(strings.TrimPrefix(key, "AS"), 10, 32); err == nil {
+			return n
+		}
+	}
+	return key
+}
+
+// NewWriter builds a writer for a format.
+func NewWriter(w io.Writer, f Format, opts Opts) Writer {
+	switch f {
+	case FormatCSV:
+		return &csvWriter{w: csv.NewWriter(w), opts: opts}
+	case FormatJSONL:
+		return &jsonlWriter{w: w, fields: opts.Fields}
+	case FormatYAML:
+		return &yamlWriter{w: w, fields: opts.Fields, answers: map[string]any{}}
+	case FormatPretty:
+		return &prettyWriter{w: w, opts: opts}
+	default:
+		return &jsonWriter{w: w, fields: opts.Fields}
+	}
+}
+
+// selected is what a --field selection keeps of an answer, or the answer as it
+// came when nothing was selected, so that output stays what it always was.
+func selected(v any, fields []string) (any, error) {
+	if len(fields) == 0 {
+		return v, nil
+	}
+	tree, err := asTree(v)
+	if err != nil {
+		return nil, err
+	}
+	return selectFields(tree, fields), nil
+}
+
+// jsonWriter emits one object keyed by what was looked up, written
+// incrementally.
+//
+// The shape matches what the reference CLI produces, but the bytes go out as
+// each answer arrives rather than from a map built in memory first.
+type jsonWriter struct {
+	w      io.Writer
+	fields []string
+	count  int
+	err    error
+}
+
+func (j *jsonWriter) Write(_ Kind, key string, v any) error {
+	v, err := selected(v, j.fields)
+	if err != nil {
+		return err
+	}
+	return j.emit(key, v)
+}
+
+func (j *jsonWriter) WriteError(_ Kind, key string, err error) error {
+	return j.emit(key, map[string]string{"error": err.Error()})
+}
+
+func (j *jsonWriter) emit(name string, v any) error {
+	if j.err != nil {
+		return j.err
+	}
+	sep := ",\n"
+	if j.count == 0 {
+		sep = "{\n"
+	}
+	key, err := json.Marshal(name)
+	if err != nil {
+		return err
+	}
+	body, err := json.MarshalIndent(v, "  ", "  ")
+	if err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(j.w, "%s  %s: %s", sep, key, body); err != nil {
+		j.err = err
+		return err
+	}
+	j.count++
+	return nil
+}
+
+func (j *jsonWriter) Close() error {
+	if j.err != nil {
+		return j.err
+	}
+	if j.count == 0 {
+		_, err := fmt.Fprintln(j.w, "{}")
+		return err
+	}
+	_, err := fmt.Fprint(j.w, "\n}\n")
+	return err
+}
+
+// jsonlWriter emits one compact object per line.
+type jsonlWriter struct {
+	w      io.Writer
+	fields []string
+}
+
+func (j *jsonlWriter) Write(_ Kind, _ string, v any) error {
+	v, err := selected(v, j.fields)
+	if err != nil {
+		return err
+	}
+	return j.emit(v)
+}
+
+// WriteError is never narrowed by a selection: an error is not an answer, and
+// its line has to say which address, AS or domain it belongs to whatever was
+// selected, in the field its answer names it by.
+func (j *jsonlWriter) WriteError(kind Kind, key string, err error) error {
+	return j.emit(map[string]any{schemas[kind].key: keyValue(kind, key), "error": err.Error()})
+}
+
+func (j *jsonlWriter) emit(v any) error {
+	body, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(j.w, "%s\n", body)
+	return err
+}
+
+func (j *jsonlWriter) Close() error { return nil }
+
+// csvWriter emits a fixed header and one row per answer, all of one kind: the
+// header is the first answer's kind's columns, which an answer of another kind
+// does not have.
+type csvWriter struct {
+	w      *csv.Writer
+	opts   Opts
+	kind   Kind
+	cols   []string
+	header bool
+}
+
+func (c *csvWriter) columns() []string {
+	if c.cols != nil {
+		return c.cols
+	}
+	if len(c.opts.Fields) > 0 {
+		c.cols = ExpandFields(c.kind, c.opts.Fields)
+	} else {
+		c.cols = schemas[c.kind].columns
+	}
+	return c.cols
+}
+
+// settle fixes the run's kind at its first answer, and refuses any other.
+func (c *csvWriter) settle(kind Kind) error {
+	if !c.header {
+		c.kind = kind
+		return nil
+	}
+	if kind != c.kind {
+		return ErrMixedCSV
+	}
+	return nil
+}
+
+func (c *csvWriter) Write(kind Kind, _ string, v any) error {
+	if err := c.settle(kind); err != nil {
+		return err
+	}
+	rec, err := Flatten(v)
+	if err != nil {
+		return err
+	}
+	if err := c.writeHeader(); err != nil {
+		return err
+	}
+	cols := c.columns()
+	row := make([]string, len(cols))
+	for i, col := range cols {
+		// An absent field is an EMPTY cell and a present false one is "false".
+		// That distinction is the only way CSV can carry "not in your plan"
+		// apart from "checked, and no".
+		row[i] = rec[col].Text
+	}
+	return c.w.Write(row)
+}
+
+func (c *csvWriter) WriteError(kind Kind, key string, err error) error {
+	if sErr := c.settle(kind); sErr != nil {
+		return sErr
+	}
+	if hErr := c.writeHeader(); hErr != nil {
+		return hErr
+	}
+	cols := c.columns()
+	row := make([]string, len(cols))
+	for i, col := range cols {
+		switch col {
+		case schemas[kind].key:
+			row[i] = fmt.Sprint(keyValue(kind, key))
+		case "error":
+			row[i] = err.Error()
+		}
+	}
+	return c.w.Write(row)
+}
+
+func (c *csvWriter) writeHeader() error {
+	if c.header {
+		return nil
+	}
+	c.header = true
+	return c.w.Write(c.columns())
+}
+
+func (c *csvWriter) Close() error {
+	if err := c.writeHeader(); err != nil {
+		return err
+	}
+	c.w.Flush()
+	return c.w.Error()
+}
+
+// yamlWriter collects and emits once.
+//
+// YAML has no streamable mapping form that stays valid mid-write, so this one
+// format genuinely holds its answers. It is documented as the wrong choice for
+// a large run rather than silently made to look like the others.
+type yamlWriter struct {
+	w       io.Writer
+	fields  []string
+	answers map[string]any
+}
+
+// Write keeps the answer as its JSON decodes, never as the SDK's Go type,
+// whose encoding nests every field under `lookupresponse:`, names it in Go's
+// spelling (`iscdn`), prints null for what the plan leaves out and a map of
+// nulls for an empty detail object. YAML says what JSON says.
+func (y *yamlWriter) Write(_ Kind, key string, v any) error {
+	tree, err := asTree(v)
+	if err != nil {
+		return err
+	}
+	if len(y.fields) > 0 {
+		tree = selectFields(tree, y.fields)
+	}
+	y.answers[key] = tree
+	return nil
+}
+
+func (y *yamlWriter) WriteError(_ Kind, key string, err error) error {
+	y.answers[key] = map[string]string{"error": err.Error()}
+	return nil
+}
+
+func (y *yamlWriter) Close() error {
+	enc := yaml.NewEncoder(y.w)
+	enc.SetIndent(2)
+	if err := enc.Encode(y.answers); err != nil {
+		return err
+	}
+	return enc.Close()
+}
+
+// prettyWriter emits the human block, one per answer.
+type prettyWriter struct {
+	w     io.Writer
+	opts  Opts
+	count int
+}
+
+func (p *prettyWriter) Write(kind Kind, _ string, v any) error {
+	rec, err := Flatten(v)
+	if err != nil {
+		return err
+	}
+	if p.count > 0 {
+		fmt.Fprintln(p.w)
+	}
+	p.count++
+	return WritePretty(p.w, kind, rec, p.opts)
+}
+
+func (p *prettyWriter) WriteError(_ Kind, key string, err error) error {
+	if p.count > 0 {
+		fmt.Fprintln(p.w)
+	}
+	p.count++
+	bad := color.New(color.FgRed)
+	if !p.opts.Color {
+		bad.DisableColor()
+	}
+	_, wErr := fmt.Fprintf(p.w, "%s\n  %s\n", key, bad.Sprint(err.Error()))
+	return wErr
+}
+
+func (p *prettyWriter) Close() error { return nil }
+
+// WritePretty renders one answer as a readable block: the fields this plan
+// carries, or what a selection or --show-absent names, with '-' for each field
+// the answer does not carry.
+//
+// A detail object that arrived empty prints as {} in all three, never as a '-'
+// for each of its fields, which would say the plan leaves them out rather than
+// that the flag above it is false.
+func WritePretty(w io.Writer, kind Kind, rec Record, opts Opts) error {
+	name := color.New(color.FgCyan)
+	value := color.New(color.FgGreen)
+	yes := color.New(color.FgYellow, color.Bold)
+	faint := color.New(color.Faint)
+	if !opts.Color {
+		for _, c := range []*color.Color{name, value, yes, faint} {
+			c.DisableColor()
+		}
+	}
+
+	fields := rec.Present(kind)
+	switch {
+	case len(opts.Fields) > 0:
+		fields = rec.Selected(kind, opts.Fields)
+	case opts.ShowAbsent:
+		fields = rec.All(kind)
+	}
+
+	width := 0
+	for _, f := range fields {
+		if len(f) > width {
+			width = len(f)
+		}
+	}
+
+	for _, f := range fields {
+		cell := rec[f]
+		text := cell.Text
+		if !cell.Present {
+			if !opts.ShowAbsent && len(opts.Fields) == 0 {
+				continue
+			}
+			text = "-"
+		}
+		rendered := value.Sprint(text)
+		switch {
+		case text == "true":
+			rendered = yes.Sprint(text)
+		case cell.EmptyObject:
+			// A present-but-empty detail object says its flag is false.
+			rendered = faint.Sprint("{}")
+		case text == "":
+			// A present empty string, as the provider of a range the dataset
+			// attributes to nobody, is not an empty object.
+			rendered = faint.Sprint(`""`)
+		case !cell.Present:
+			rendered = faint.Sprint(text)
+		}
+		if _, err := fmt.Fprintf(w, "%s  %s\n", name.Sprintf("%-*s", width, f), rendered); err != nil {
+			return err
+		}
+	}
+
+	// Nothing is printed about the fields this plan does not include. It was a
+	// summary line here, and on a lookup without a key, where all but a few
+	// fields are absent, it was longer than the answer and appeared under every
+	// single lookup. --show-absent renders them as rows for anyone who wants them, and
+	// the absent-versus-false rule is stated once in the README rather than on
+	// every line of output.
+	return nil
+}

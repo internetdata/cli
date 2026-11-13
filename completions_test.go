@@ -13,8 +13,8 @@ import (
 // apart and nothing fails when they disagree: database's help listed --retries
 // from 1.0.0, and its completion did not.
 func TestCompletionOffersEveryFlagTheHelpLists(t *testing.T) {
-	// handleCompletions gives the top level the options every command takes,
-	// and returns when no shell is asking.
+	// handleCompletions gives the top level the lookup's flags, and returns when
+	// no shell is asking.
 	handleCompletions()
 	cases := []struct {
 		name string
@@ -23,12 +23,15 @@ func TestCompletionOffersEveryFlagTheHelpLists(t *testing.T) {
 	}{
 		// The top level alone: a subcommand's flags are not offered there.
 		{"default", printHelpDefault, &complete.Command{Flags: completions.Flags}},
+		{"bulk", printHelpBulk, completions.Sub["bulk"]},
+		{"myip", printHelpMyIP, completions.Sub["myip"]},
 		{"whoami", printHelpWhoami, completions.Sub["whoami"]},
 		{"database", printHelpDatabase, completions.Sub["database"]},
 		{"login", printHelpLogin, completions.Sub["login"]},
 		{"logout", printHelpLogout, completions.Sub["logout"]},
 		{"signup", printHelpSignup, completions.Sub["signup"]},
 		{"session", printHelpSession, completions.Sub["session"]},
+		{"cache", printHelpCache, completions.Sub["cache"]},
 		{"config", printHelpConfig, completions.Sub["config"]},
 		{"completion", printHelpCompletion, completions.Sub["completion"]},
 	}
@@ -42,8 +45,8 @@ func TestCompletionOffersEveryFlagTheHelpLists(t *testing.T) {
 		eachFlag(c.cmd, func(flag string, _ complete.Predictor) { offered[flag] = true })
 		for _, flag := range helpFlags(help) {
 			listed++
-			// Every command takes these, and completion offers them at the top
-			// level alone.
+			// Every command takes these, and completion offers them only beside
+			// the lookup's flags.
 			if flag == "--help" || flag == "-h" {
 				continue
 			}
@@ -66,7 +69,7 @@ func helpFlags(help string) []string {
 		if !strings.HasPrefix(line, "-") {
 			continue
 		}
-		// A description can sit on its flag's line, two spaces on.
+		// A format's description sits on its flag's line, two spaces on.
 		line, _, _ = strings.Cut(line, "  ")
 		for _, spelling := range strings.Split(line, ", ") {
 			flags = append(flags, strings.Fields(spelling)[0])
@@ -112,8 +115,8 @@ func TestCompletionKnowsWhichFlagsTakeAValue(t *testing.T) {
 // fell back to file names.
 func TestCompletionAfterAFlag(t *testing.T) {
 	for _, c := range []struct{ before, after string }{
-		{"internetdata ", "internetdata --help "},
-		{"internetdata whoami ", "internetdata whoami --json "},
+		{"internetdata ", "internetdata --nocache "},
+		{"internetdata bulk ", "internetdata bulk --json "},
 		{"internetdata db download ", "internetdata db download --stdout "},
 	} {
 		want := completeLine(t, c.before)
@@ -125,8 +128,8 @@ func TestCompletionAfterAFlag(t *testing.T) {
 		}
 	}
 	// A flag that takes a value is offered its values instead.
-	if got := completeLine(t, "internetdata db download --format "); got != "csvgz\nmmdb\n" {
-		t.Errorf("--format completes to %q, want the two formats", got)
+	if got := completeLine(t, "internetdata bulk --format "); got != "csv\njson\njsonl\npretty\nyaml\n" {
+		t.Errorf("--format completes to %q, want the five formats", got)
 	}
 }
 

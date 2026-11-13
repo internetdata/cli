@@ -1,23 +1,49 @@
 package main
 
 import (
+	"slices"
+
+	"github.com/internetdata/cli/lib"
 	complete "github.com/mslmio/libgo-complete"
 	"github.com/mslmio/libgo-complete/predict"
 )
 
 // formats is every --format value, offered wherever one is taken.
-var formats = predict.Set([]string{"csvgz", "mmdb"})
+var formats = predict.Set([]string{"pretty", "json", "jsonl", "csv", "yaml"})
 
-// globalCompletions are the options every command accepts.
-func globalCompletions() map[string]complete.Predictor {
+// fieldNames is every field an answer can carry, an address's, an AS's or a
+// domain's.
+var fieldNames = predict.Set(slices.Compact(slices.Sorted(slices.Values(
+	slices.Concat(lib.Columns, lib.ASNColumns, lib.DomainColumns)))))
+
+// dbFormats is every file a database is published as.
+var dbFormats = predict.Set([]string{"csvgz", "mmdb"})
+
+// outputFlags are the ones every lookup command shares.
+func outputFlags() map[string]complete.Predictor {
 	return map[string]complete.Predictor{
-		"--key":      predict.Something,
-		"-k":         predict.Something,
-		"--session":  sessionNames(),
-		"--base-url": predict.Something,
-		"--retries":  predict.Something,
-		"--help":     predict.Nothing,
-		"-h":         predict.Nothing,
+		"--field": fieldNames, "-f": fieldNames,
+		"--format":      formats,
+		"--json":        predict.Nothing,
+		"-j":            predict.Nothing,
+		"--jsonl":       predict.Nothing,
+		"--csv":         predict.Nothing,
+		"-c":            predict.Nothing,
+		"--yaml":        predict.Nothing,
+		"-y":            predict.Nothing,
+		"--pretty":      predict.Nothing,
+		"-p":            predict.Nothing,
+		"--show-absent": predict.Nothing,
+		"--nocolor":     predict.Nothing,
+		"--nocache":     predict.Nothing,
+		"--concurrency": predict.Something,
+		"--retries":     predict.Something,
+		"--key":         predict.Something,
+		"-k":            predict.Something,
+		"--session":     sessionNames(),
+		"--base-url":    predict.Something,
+		"--help":        predict.Nothing,
+		"-h":            predict.Nothing,
 	}
 }
 
@@ -29,6 +55,8 @@ func sessionNames() complete.Predictor {
 
 var completions = &complete.Command{
 	Sub: map[string]*complete.Command{
+		"bulk":     {Flags: outputFlags()},
+		"myip":     {Flags: outputFlags()},
 		"database": databaseCompletions,
 		"db":       databaseCompletions,
 		"login":    loginCompletions,
@@ -40,10 +68,12 @@ var completions = &complete.Command{
 		"signup":   {Flags: map[string]complete.Predictor{"--no-browser": predict.Nothing}},
 		"session":  sessionCompletions,
 		"sessions": sessionCompletions,
-		"whoami": {Flags: map[string]complete.Predictor{
-			"--json": predict.Nothing, "-j": predict.Nothing,
-		}},
-		"config":     {Args: predict.Set([]string{"list", "retries="})},
+		"whoami":   whoamiCompletions,
+		"cache":    {Args: predict.Set([]string{"info", "clear"})},
+		"config": {Args: predict.Set([]string{
+			"list", "cache=enable", "cache=disable", "cache_ttl=", "format=",
+			"concurrency=", "retries=",
+		})},
 		"completion": {Args: predict.Set([]string{"install", "uninstall", "bash", "zsh", "fish"})},
 		"version":    {},
 	},
@@ -51,6 +81,8 @@ var completions = &complete.Command{
 		"--version": predict.Nothing,
 		"--vsn":     predict.Nothing,
 		"-v":        predict.Nothing,
+		"--help":    predict.Nothing,
+		"-h":        predict.Nothing,
 	},
 }
 
@@ -63,18 +95,18 @@ var databaseCompletions = &complete.Command{
 		}},
 		"metadata": {Flags: map[string]complete.Predictor{"--retries": predict.Something}},
 		"checksum": {Flags: map[string]complete.Predictor{
-			"--format": formats, "--json": predict.Nothing, "-j": predict.Nothing,
+			"--format": dbFormats, "--json": predict.Nothing, "-j": predict.Nothing,
 			"--retries": predict.Something,
 		}},
 		"url": {Flags: map[string]complete.Predictor{
-			"--format": formats, "--retries": predict.Something,
+			"--format": dbFormats, "--retries": predict.Something,
 		}},
 		"downloads": {Flags: map[string]complete.Predictor{
 			"--limit": predict.Something, "--json": predict.Nothing, "-j": predict.Nothing,
 			"--retries": predict.Something,
 		}},
 		"download": {Flags: map[string]complete.Predictor{
-			"--format":    formats,
+			"--format":    dbFormats,
 			"--stdout":    predict.Nothing,
 			"--no-verify": predict.Nothing,
 			"--retries":   predict.Something,
@@ -106,11 +138,16 @@ var sessionCompletions = &complete.Command{
 	},
 }
 
+// whoamiCompletions is shared by `whoami` and its `entitlement` alias.
+var whoamiCompletions = &complete.Command{Flags: map[string]complete.Predictor{
+	"--json": predict.Nothing, "-j": predict.Nothing,
+}}
+
 // handleCompletions answers a shell completion request, if this is one.
 func handleCompletions() {
 	// Also the top-level flag set, so completing at the very start offers the
-	// options every command takes.
-	for flag, p := range globalCompletions() {
+	// output options an address lookup takes.
+	for flag, p := range outputFlags() {
 		if _, taken := completions.Flags[flag]; !taken {
 			completions.Flags[flag] = p
 		}

@@ -6,6 +6,7 @@ Architecture: amd64
 Maintainer: Mslm Dev <support@internetdata.io>
 Homepage: https://internetdata.io
 Description: Official CLI for the InternetData API
- List the IP and network databases your organization is licensed for, see
- what is inside one before you fetch it, and download it in CSV.GZ or MMDB,
- verified against its published checksum.
+ Look up what an IP address is - where it is, the AS and company behind it,
+ and whether it is a VPN, a proxy, a Tor exit, a relay, or a hosting, CDN,
+ carrier or satellite network - one address at a time or in bulk, look up an AS
+ or a domain, and download the databases.

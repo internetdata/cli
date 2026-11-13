@@ -11,8 +11,8 @@ import (
 )
 
 // The order is --key, then the environment, then the active session, then
-// nothing - and "nothing" is a working state rather than an error, because
-// signing in needs no key.
+// nothing - and "nothing" is a working state rather than an error, because a
+// lookup needs no key.
 func TestResolveKeyPrecedence(t *testing.T) {
 	cfg := NewConfig()
 	cfg.Sessions["work"] = &Session{Key: "from-session"}
@@ -231,8 +231,11 @@ func TestLoadConfigRefusesWhatOthersCanOpen(t *testing.T) {
 	}
 }
 
-// The fingerprint is how `session show` tells two credentials apart, so it has
-// to be stable, wide enough not to collide, and never the key itself.
+// The fingerprint is what partitions the cache, so its width is load-bearing:
+// two keys whose fingerprints collide share a bucket, and one is then served
+// the other's answer under a plan that need not carry the same fields.
+// cache_test.go pins only that two sampled keys differ, which a narrower
+// truncation would still satisfy.
 func TestKeyFingerprint(t *testing.T) {
 	const width = 12
 	const key = "mk_1234567890abcd"
@@ -249,7 +252,7 @@ func TestKeyFingerprint(t *testing.T) {
 		t.Errorf("fingerprint %q is not lowercase hex", fp)
 	}
 	if keyFingerprint(key) != fp {
-		t.Error("the fingerprint is not stable for one key")
+		t.Error("the fingerprint is not stable for one key, so the cache never hits")
 	}
 	if strings.Contains(fp, key) {
 		t.Errorf("the fingerprint leaks the key: %q", fp)
@@ -287,6 +290,7 @@ func TestNewClientStampsTheSessionItUses(t *testing.T) {
 	fSession = ""
 
 	gConfig = NewConfig()
+	gConfig.CacheEnabled = false
 	gConfig.Sessions["work"] = &Session{Key: "key-work", Created: time.Now()}
 	gConfig.Active = "work"
 	if err := SaveConfig(gConfig); err != nil {
@@ -296,9 +300,11 @@ func TestNewClientStampsTheSessionItUses(t *testing.T) {
 	use := func(key string) {
 		t.Helper()
 		fKey = key
-		if _, err := NewClient(); err != nil {
+		client, err := NewClient()
+		if err != nil {
 			t.Fatal(err)
 		}
+		client.Close()
 	}
 	load := func() Config {
 		t.Helper()

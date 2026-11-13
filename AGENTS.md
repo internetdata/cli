@@ -3,34 +3,46 @@
 The official CLI, a presentation layer over `github.com/internetdata/sdk-go/v2`.
 Public repo: `github.com/internetdata/cli`, with gitea as a second push URL.
 
-Structure: a flat dispatch in `main.go`, one `cmd_<name>.go` per command, and
-per-command completion predictors in `completions.go`. It lists, describes and
-downloads the databases an organization is licensed for; there is no per-IP
-lookup, result cache or field selection.
+Structure: a flat dispatch in `main.go`, one `cmd_<name>.go` per command,
+per-command completion predictors in `completions.go`, and output machinery in
+`lib/`. It looks up an address, an AS or a domain (since 1.5.0), and lists,
+describes and downloads the databases.
 
 ## The non-obvious parts
 
-- **The API is at the apex (`internetdata.io`)**, so `signupURL()` has no `api`
-  label to swap: the apex maps to `app.`, a three-label `E.internetdata.io` to
-  `app-E.internetdata.io`, and an `api`-labeled host keeps the sibling shape -
-  the same rule the API applies to its device page.
-  Anything else falls back to production. `cmd_signup_test.go` pins it.
-- **`whoami` has no entitlement to show.** It prints the credential first, so a
-  refused key still says which key it was, then the families the organization
-  holds a license for (standing not `unlicensed`) from `Database.List()`.
-  `checkKey` validates through the same call, so a key without `db.download` is
-  refused at login, and it arrives as a 401, not a 403: keys are default-deny.
-- **A bare invocation prints help, and an unknown word is named as a mistake.**
-  There is no default command to fall into.
-- **No color.** Nothing prints any, so there is no `--nocolor` and no
-  `fatih/color`.
-- **Every SDK client is built with `namedHTTPClient()`**, which puts
-  `internetdata-cli/<version>` first in the User-Agent, file transfer included,
-  and keeps the SDK's 30 s timeout, which applies only when no client is passed.
-  `NewClient` and `signInAPI` are the two today, and
-  `TestEveryRequestNamesTheCLIFirst` covers only those: a third
-  `internetdata.New` without it sends Go's default. sdk-go v2.9.1 sets no
-  User-Agent of its own, so the CLI's name is the whole header until one does.
+- **An AS (`AS15169`) or a domain (`example.com`) is a lookup too**, by the
+  SDK's `LookupASN` and `LookupDomain`: one request each, never cached, never
+  batched, answered after the addresses in the order typed. Only a TYPED
+  argument is one: a list, piped or in a file, is read for addresses, so a log
+  full of hostnames costs no domain lookups. `classify` decides: an address,
+  range or CIDR, then `AS<n>`, then a file that exists (a list file reads like a
+  domain), then a domain's shape (`isDomain`: LDH labels, a top label not all
+  digits, so `8.8.8.888` is refused here rather than sent).
+- **Each kind has its own columns**: `lib.Columns`, `ASNColumns` and
+  `DomainColumns`, each append-only, as `lib.Columns` says, and the writers take
+  the kind with every answer. A CSV's header is its first answer's kind, so a
+  CSV of two kinds is refused (`lib.ErrMixedCSV`), before any request when the
+  arguments alone mix them. A `--field` is checked against the kinds the
+  arguments ask for (`answerKinds`): addresses always, as stdin may add them.
+  An AS's error line names it by its number, `{"asn":15169,...}`, and its JSON
+  key is `AS<n>` however it was typed.
+- **The AS whois record is a map in the SDK**, so its 39 columns come from the
+  record the spec's paid example documents, and
+  `TestASNWhoisColumnsAreTheDocumentedKeys` holds them to that answer's keys,
+  where `TestColumnsAreTheSDKsFields` holds every other column to the SDK's
+  types.
+- **Keys are default-deny**: a key without the `db.download` scope looks
+  addresses up and is refused by every database call, as a 401. So database
+  errors go through `explainDatabase`, which names the scope, an address the
+  allowed addresses leave out and the license apart, and `checkKey` validates
+  a key at login with a lookup, never the listing.
+- **Calls go to `https://api.internetdata.io`, sign-in to the apex**, which the
+  SDK's `client.Oauth` derives from the base URL (`api.` dropped, `api-<env>.`
+  becoming `<env>.`); `TestSignInGoesToTheApexAndTheRestToTheAPIHost` pins
+  both. The apex answers the database paths too, so a session may hold it:
+  `signupURL()` maps the apex to `app.`, a three-label `E.internetdata.io` to
+  `app-E.internetdata.io`, and an `api`-labeled host keeps the sibling shape.
+  `cmd_signup_test.go` pins it.
 
 ## Channel state (2026-11-13, v1.4.14)
 

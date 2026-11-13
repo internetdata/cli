@@ -26,15 +26,25 @@ type Config struct {
 	// guess.
 	Version int `json:"version"`
 
-	// Active names the session in use. Empty means none: a key can still come
-	// from --key or the environment.
+	// Active names the session in use. Empty means unauthenticated, which is a
+	// working state: the API answers a lookup with no key at all.
 	Active string `json:"active"`
 
 	// Sessions are the stored credentials, keyed by name.
 	Sessions map[string]*Session `json:"sessions"`
 
-	// Retries defaults what the client is built with.
-	Retries int `json:"retries"`
+	// CacheEnabled controls the on-disk lookup cache.
+	CacheEnabled bool `json:"cache_enabled"`
+
+	// CacheTTL is how long a cached answer stays good, as a duration string.
+	CacheTTL string `json:"cache_ttl"`
+
+	// Format is the default output format for a single lookup.
+	Format string `json:"format"`
+
+	// Concurrency and Retries default what the client is built with.
+	Concurrency int `json:"concurrency"`
+	Retries     int `json:"retries"`
 }
 
 // Session is one stored credential.
@@ -52,7 +62,7 @@ type Session struct {
 	LastUsed time.Time `json:"last_used,omitempty"`
 
 	// RefreshToken is present only for a session created by `login` in a
-	// browser. It is NOT used for requests - the API key above is - and exists
+	// browser. It is NOT used for lookups - the API key above is - and exists
 	// so `logout` can revoke server-side instead of only deleting this file,
 	// which is the difference between signing out and forgetting.
 	RefreshToken string `json:"refresh_token,omitempty"`
@@ -63,21 +73,28 @@ type Session struct {
 }
 
 const (
-	configVersion  = 1
-	defaultSession = "default"
-	defaultRetries = 2
+	configVersion      = 1
+	defaultSession     = "default"
+	defaultCacheTTL    = "1h"
+	defaultFormat      = "pretty"
+	defaultConcurrency = 8
+	defaultRetries     = 2
 )
 
 // NewConfig is the config a first run gets.
 func NewConfig() Config {
 	return Config{
-		Version:  configVersion,
-		Sessions: map[string]*Session{},
-		Retries:  defaultRetries,
+		Version:      configVersion,
+		Sessions:     map[string]*Session{},
+		CacheEnabled: true,
+		CacheTTL:     defaultCacheTTL,
+		Format:       defaultFormat,
+		Concurrency:  defaultConcurrency,
+		Retries:      defaultRetries,
 	}
 }
 
-// ConfigDir is where the config lives, created if missing.
+// ConfigDir is where the config and cache live, created if missing.
 //
 // 0700 because the config file holds API keys; a 0755 directory would leave
 // them listable by every other account on a shared machine.
@@ -240,9 +257,9 @@ func (c Config) ActiveSessionName() string {
 // ResolveKey is the API key to present, and where it came from.
 //
 // The order is deliberate: an explicit flag beats the environment, which beats
-// stored state, and no key at all is a valid answer rather than an error -
-// signing in and help need none. A command that genuinely requires one says so
-// itself, with a message naming how to get one.
+// stored state, and no key at all is a valid answer rather than an error - a
+// lookup needs none. A command that genuinely requires one says so itself,
+// with a message naming how to get one.
 //
 // A key given for one run is trimmed, as login trims what it stores: it goes
 // out as a header value, and the CR a key file saved on Windows leaves behind
@@ -277,10 +294,9 @@ func (c Config) ResolveBaseURL() string {
 // touchSession records that the active session's key is in use, for the LAST
 // USED column of `session list`. Best effort and at most once a minute, the
 // resolution `since` prints: it must never fail a command, nor rewrite the
-// credential file on every command a script runs. Both are judged by the file
-// as it is now rather than by gConfig, so a session another terminal stored
-// since this process started survives, and parallel runs stop at the first
-// stamp.
+// credential file on every lookup of a script. Both are judged by the file as
+// it is now rather than by gConfig, so a session another terminal stored since
+// this process started survives, and parallel runs stop at the first stamp.
 func touchSession(key string) {
 	if key == "" {
 		return
@@ -299,8 +315,8 @@ func touchSession(key string) {
 
 // keyFingerprint identifies a key without storing or showing it.
 //
-// Shows which credential is in play. Truncated because it is an identifier,
-// not a digest anyone verifies.
+// Used to scope the cache and to show which credential is in play. Truncated
+// because it is an identifier, not a digest anyone verifies.
 func keyFingerprint(key string) string {
 	if key == "" {
 		return "none"
@@ -318,4 +334,16 @@ func maskKey(key string) string {
 		return strings.Repeat("*", len(key))
 	}
 	return key[:4] + strings.Repeat("*", len(key)-8) + key[len(key)-4:]
+}
+
+// cacheTTL is the configured TTL, falling back to the default when the stored
+// value is unparseable rather than failing every lookup over it.
+func (c Config) cacheTTL() time.Duration {
+	if c.CacheTTL != "" {
+		if d, err := time.ParseDuration(c.CacheTTL); err == nil && d > 0 {
+			return d
+		}
+	}
+	d, _ := time.ParseDuration(defaultCacheTTL)
+	return d
 }

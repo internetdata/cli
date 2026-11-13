@@ -18,7 +18,7 @@ RUN --mount=type=cache,target=/go/pkg/mod/ \
 
 # Distroless rather than a full base: this is one static binary that makes HTTPS
 # calls, so all it needs is CA certificates. It does need a writable HOME for
-# the config, which the nonroot image provides at /home/nonroot.
+# the config and cache, which the nonroot image provides at /home/nonroot.
 FROM gcr.io/distroless/static-debian12:nonroot
 
 COPY --from=builder /dist/internetdata /usr/local/bin/internetdata

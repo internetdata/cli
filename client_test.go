@@ -14,7 +14,7 @@ import (
 // Both refusals are a 403, and each needs a different thing done next: a key
 // refused for its address is a valid key, which a license hint sends looking at
 // the wrong setting.
-func TestExplain(t *testing.T) {
+func TestExplainDatabase(t *testing.T) {
 	cases := []struct {
 		kind   internetdata.ErrorKind
 		status int
@@ -27,7 +27,7 @@ func TestExplain(t *testing.T) {
 		{internetdata.KindUnauthorized, 401, "UNAUTHORIZED", "was not accepted"},
 	}
 	for _, c := range cases {
-		err := explain(&internetdata.Error{Kind: c.kind, Message: c.code, StatusCode: c.status})
+		err := explainDatabase(&internetdata.Error{Kind: c.kind, Message: c.code, StatusCode: c.status})
 		if got := err.Error(); !strings.Contains(got, c.want) {
 			t.Errorf("%s: got %q, want it to contain %q", c.code, got, c.want)
 		}
@@ -38,10 +38,10 @@ func TestExplain(t *testing.T) {
 }
 
 // Both of the CLI's SDK clients, the keyed one and the keyless sign-in one, name
-// the CLI first, on the API's calls and on the file transfer alike, so the API
-// can tell this CLI's traffic, and its version, from any other program built on
-// the SDK. Whatever the SDK sends of its own follows, as one more product.
-func TestEveryRequestNamesTheCLIFirst(t *testing.T) {
+// the CLI first and the SDK after it, on a lookup, the API's other calls and the
+// file transfer alike, so the API can tell this CLI's traffic, and its version,
+// from any other program built on the SDK.
+func TestEveryRequestNamesTheCLIThenTheSDK(t *testing.T) {
 	var mu sync.Mutex
 	agents := map[string]string{}
 	var api *httptest.Server
@@ -54,6 +54,9 @@ func TestEveryRequestNamesTheCLIFirst(t *testing.T) {
 			http.Redirect(w, r, api.URL+"/files/vpn_ip_v1.csvgz", http.StatusFound)
 		case "/files/vpn_ip_v1.csvgz":
 			_, _ = io.WriteString(w, "range\n")
+		case "/9.1.0.1":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = io.WriteString(w, answerJSON("9.1.0.1"))
 		default:
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
@@ -68,13 +71,18 @@ func TestEveryRequestNamesTheCLIFirst(t *testing.T) {
 	savedConfig, savedBaseURL, savedRetries := gConfig, fBaseURL, fRetries
 	t.Cleanup(func() { gConfig, fBaseURL, fRetries = savedConfig, savedBaseURL, savedRetries })
 	gConfig, fBaseURL, fRetries = NewConfig(), api.URL, 0
+	gConfig.CacheEnabled = false
 
 	c, err := NewClient()
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer c.Close()
 	_, err = c.Database().Download(t.Context(), "vpn_ip_v1", internetdata.FormatCSVGZ, io.Discard)
 	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.api.Lookup(t.Context(), "9.1.0.1"); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := startDeviceAuth(t.Context()); err == nil {
@@ -82,13 +90,13 @@ func TestEveryRequestNamesTheCLIFirst(t *testing.T) {
 	}
 
 	want := "internetdata-cli/" + version
-	if len(agents) != 3 {
-		t.Fatalf("saw requests to %v, want the download, its file and a sign-in start", agents)
+	if len(agents) != 4 {
+		t.Fatalf("saw requests to %v, want the download, its file, a lookup and a sign-in start", agents)
 	}
 	for path, agent := range agents {
 		products := strings.Fields(agent)
-		if len(products) == 0 || products[0] != want || len(products) > 2 {
-			t.Errorf("%s was sent User-Agent %q, want %s, then at most the SDK's", path, agent, want)
+		if len(products) != 2 || products[0] != want || !strings.HasPrefix(products[1], "internetdata-go/") {
+			t.Errorf("%s was sent User-Agent %q, want %s internetdata-go/<the SDK's version>", path, agent, want)
 		}
 	}
 }

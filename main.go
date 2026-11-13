@@ -1,6 +1,6 @@
 // Command internetdata is the official command line for the InternetData API:
-// list the databases your organization is licensed for, see what is inside one,
-// and download it.
+// look up an address, an AS or a domain, look up a great many addresses, and
+// download the databases.
 package main
 
 import (
@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/spf13/pflag"
 )
 
@@ -22,14 +23,22 @@ var progBase = filepath.Base(os.Args[0])
 
 // Global flags, registered by globalFlags and shared by every command.
 var (
-	fHelp    bool
-	fKey     string
-	fSession string
-	fBaseURL string
-	fRetries = -1
+	fHelp        bool
+	fNoColor     bool
+	fNoCache     bool
+	fKey         string
+	fSession     string
+	fBaseURL     string
+	fConcurrency int
+	fRetries     = -1
 )
 
 func main() {
+	// NO_COLOR is the cross-tool convention and costs nothing to honor.
+	if os.Getenv("NO_COLOR") != "" {
+		color.NoColor = true
+	}
+
 	// Answered before anything else: the shell invokes the binary with
 	// COMP_LINE set and reads candidates from stdout, so nothing else may
 	// print first.
@@ -37,6 +46,10 @@ func main() {
 
 	var err error
 	switch detectCommand() {
+	case "myip":
+		err = cmdMyIP()
+	case "bulk":
+		err = cmdBulk()
 	case "signup":
 		err = cmdSignup()
 	case "login", "init":
@@ -49,6 +62,8 @@ func main() {
 		err = cmdWhoami()
 	case "database", "db":
 		err = cmdDatabase()
+	case "cache":
+		err = cmdCache()
 	case "config":
 		err = cmdConfig()
 	case "completion":
@@ -56,11 +71,15 @@ func main() {
 	case "version", "vsn", "v":
 		err = cmdVersion()
 	default:
-		// Not a subcommand, so it is either a request for help or a mistake.
-		// cmdDefault tells those apart.
+		// Not a subcommand, so it is either something to look up, a request for
+		// help, or a mistake. cmdDefault tells those apart.
 		err = cmdDefault()
 	}
 
+	if err == errUnanswered {
+		// Each unanswered lookup carries its error in the output already.
+		os.Exit(1)
+	}
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "err: %v\n", err)
 		os.Exit(1)
@@ -69,9 +88,9 @@ func main() {
 
 // subcommands is every command name, including aliases.
 var subcommands = map[string]bool{
-	"signup": true, "login": true, "init": true, "logout": true,
+	"myip": true, "bulk": true, "signup": true, "login": true, "init": true, "logout": true,
 	"session": true, "sessions": true, "whoami": true,
-	"database": true, "db": true, "config": true,
+	"database": true, "db": true, "cache": true, "config": true,
 	"completion": true, "version": true, "vsn": true, "v": true,
 }
 
@@ -79,16 +98,17 @@ var subcommands = map[string]bool{
 // session named "database" is not mistaken for the database command.
 var valueFlags = map[string]bool{
 	"--key": true, "-k": true, "--session": true, "--base-url": true,
-	"--format": true, "--retries": true, "--limit": true,
+	"--format": true, "--field": true, "-f": true,
+	"--concurrency": true, "--retries": true, "--limit": true,
 }
 
 // commandArg is the index in os.Args of the subcommand, or 0 for none.
 //
 // Scanned rather than read from os.Args[1], because a flag may come first:
 // `internetdata --session work db list` is a natural thing to type, and taking
-// the second argument literally makes "--session" the command. The value-taking
-// flags are skipped so that `--session database` names a session rather than
-// invoking a command.
+// the second argument literally makes it a lookup of "--session".
+// The value-taking flags are skipped so that `--session database` names a
+// session rather than invoking a command.
 func commandArg() int {
 	for i := 1; i < len(os.Args); i++ {
 		arg := os.Args[i]
@@ -102,14 +122,14 @@ func commandArg() int {
 		if subcommands[arg] {
 			return i
 		}
-		// The first positional that is not a command is a mistake, and a
-		// command cannot follow it.
+		// The first positional that is not a command is something to look up,
+		// and a command cannot follow it.
 		return 0
 	}
 	return 0
 }
 
-// detectCommand is the subcommand being run, or "" when there is none.
+// detectCommand is the subcommand being run, or "" when this is a lookup.
 func detectCommand() string {
 	if i := commandArg(); i > 0 {
 		return os.Args[i]
@@ -124,19 +144,30 @@ func detectCommand() string {
 // commands registering the same flag name would panic at startup.
 func globalFlags() {
 	pflag.BoolVarP(&fHelp, "help", "h", false, "show help.")
+	pflag.BoolVar(&fNoColor, "nocolor", false, "disable colored output.")
 	pflag.StringVarP(&fKey, "key", "k", "", "API key to use for this run.")
 	pflag.StringVar(&fSession, "session", "", "named session to use for this run.")
 	pflag.StringVar(&fBaseURL, "base-url", "", "API base URL to use for this run.")
 }
 
-// apiFlags adds the options every command that reaches the API takes.
-func apiFlags() {
+// lookupFlags adds the options every command that reaches the lookup API takes.
+func lookupFlags() {
+	pflag.BoolVar(&fNoCache, "nocache", false, "do not read or write the cache.")
+	pflag.IntVar(&fConcurrency, "concurrency", 0, "in-flight requests during a bulk lookup.")
 	pflag.IntVar(&fRetries, "retries", -1, "retries per request.")
 }
 
-// parseFlags parses and returns the positional arguments.
+// parseFlags parses, applies whatever the global flags imply, and returns the
+// positional arguments.
+//
+// Nothing is stripped: the default command's positionals are the addresses to
+// look up, and dropping the first one silently loses an address whenever the
+// user names more than one.
 func parseFlags() []string {
 	pflag.Parse()
+	if fNoColor {
+		color.NoColor = true
+	}
 	return pflag.Args()
 }
 

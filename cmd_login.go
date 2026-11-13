@@ -162,9 +162,7 @@ func promptKey() (string, error) {
 // checkKey confirms the API accepts a key before it is stored.
 //
 // Worth a request: a mistyped key stored silently turns every later command
-// into a 401, and the obvious explanation - "my license lapsed" - is the wrong
-// one. The listing is the call every database command depends on, so a key it
-// accepts is one this CLI can use.
+// into a 401, and the obvious explanation - "my plan lapsed" - is the wrong one.
 func checkKey(key, baseURL string) error {
 	saveKey, saveURL := fKey, fBaseURL
 	fKey, fBaseURL = key, baseURL
@@ -174,10 +172,13 @@ func checkKey(key, baseURL string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	if _, err := client.Database().List(ctx); err != nil {
+	// A public address, so the answer exercises the key rather than the bogon
+	// short-circuit, which never reaches the network and so proves nothing.
+	if _, err := client.api.Lookup(ctx, "1.1.1.1"); err != nil {
 		return fmt.Errorf("the key was not accepted: %w\n(use --no-check to store it anyway)", explain(err))
 	}
 	return nil

@@ -26,11 +26,15 @@ func TestDetectCommand(t *testing.T) {
 		want string
 	}{
 		{[]string{"internetdata"}, ""},
+		{[]string{"internetdata", "1.1.1.1"}, ""},
+		{[]string{"internetdata", "1.1.1.1", "2.2.2.2"}, ""},
+		{[]string{"internetdata", "AS15169"}, ""},
+		{[]string{"internetdata", "example.com"}, ""},
 		{[]string{"internetdata", "db", "list"}, "db"},
 		{[]string{"internetdata", "database", "list"}, "database"},
 
 		// A flag first.
-		{[]string{"internetdata", "--retries", "3", "db", "list"}, "db"},
+		{[]string{"internetdata", "--nocache", "db", "list"}, "db"},
 		{[]string{"internetdata", "--session", "work", "db", "list"}, "db"},
 		{[]string{"internetdata", "-k", "secret", "whoami"}, "whoami"},
 		{[]string{"internetdata", "--session=work", "db"}, "db"},
@@ -38,12 +42,13 @@ func TestDetectCommand(t *testing.T) {
 		// The value of a value-taking flag is never a command, however it is
 		// spelled.
 		{[]string{"internetdata", "--session", "database"}, ""},
-		{[]string{"internetdata", "--session", "version", "whoami"}, "whoami"},
-		{[]string{"internetdata", "--format", "version", "db"}, "db"},
+		{[]string{"internetdata", "--session", "version", "1.1.1.1"}, ""},
+		{[]string{"internetdata", "-f", "version", "1.1.1.1"}, ""},
 
-		// A word that is not a command cannot be followed by one: it is the
-		// mistake the default command names.
-		{[]string{"internetdata", "bogus", "db"}, ""},
+		// An address cannot be followed by a command; everything after it is
+		// more input.
+		{[]string{"internetdata", "1.1.1.1", "db"}, ""},
+		{[]string{"internetdata", "example.com", "version"}, ""},
 
 		// Aliases.
 		{[]string{"internetdata", "init"}, "init"},
@@ -78,6 +83,7 @@ func TestBareGroupPrintsHelp(t *testing.T) {
 		{"sessions", cmdSession},
 		{"database", cmdDatabase},
 		{"db", cmdDatabase},
+		{"cache", cmdCache},
 		{"config", cmdConfig},
 		{"completion", cmdCompletion},
 	}
