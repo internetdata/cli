@@ -1,7 +1,11 @@
 package main
 
 import (
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 
 	internetdata "github.com/internetdata/sdk-go/v2"
@@ -29,6 +33,62 @@ func TestExplain(t *testing.T) {
 		}
 		if c.code == "IP_NOT_ALLOWED" && strings.Contains(err.Error(), "license") {
 			t.Errorf("%s names the license: %q", c.code, err.Error())
+		}
+	}
+}
+
+// Both of the CLI's SDK clients, the keyed one and the keyless sign-in one, name
+// the CLI first, on the API's calls and on the file transfer alike, so the API
+// can tell this CLI's traffic, and its version, from any other program built on
+// the SDK. Whatever the SDK sends of its own follows, as one more product.
+func TestEveryRequestNamesTheCLIFirst(t *testing.T) {
+	var mu sync.Mutex
+	agents := map[string]string{}
+	var api *httptest.Server
+	api = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		agents[r.URL.Path] = r.Header.Get("User-Agent")
+		mu.Unlock()
+		switch r.URL.Path {
+		case "/api/v2/database/download":
+			http.Redirect(w, r, api.URL+"/files/vpn_ip_v1.csvgz", http.StatusFound)
+		case "/files/vpn_ip_v1.csvgz":
+			_, _ = io.WriteString(w, "range\n")
+		default:
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = io.WriteString(w, `{"error":"slow_down"}`)
+		}
+	}))
+	t.Cleanup(api.Close)
+
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("INTERNETDATA_API_KEY", "k-test")
+	t.Setenv("INTERNETDATA_SESSION", "")
+	savedConfig, savedBaseURL, savedRetries := gConfig, fBaseURL, fRetries
+	t.Cleanup(func() { gConfig, fBaseURL, fRetries = savedConfig, savedBaseURL, savedRetries })
+	gConfig, fBaseURL, fRetries = NewConfig(), api.URL, 0
+
+	c, err := NewClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = c.Database().Download(t.Context(), "vpn_ip_v1", internetdata.FormatCSVGZ, io.Discard)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := startDeviceAuth(t.Context()); err == nil {
+		t.Fatal("the sign-in start succeeded against an origin that refuses it")
+	}
+
+	want := "internetdata-cli/" + version
+	if len(agents) != 3 {
+		t.Fatalf("saw requests to %v, want the download, its file and a sign-in start", agents)
+	}
+	for path, agent := range agents {
+		products := strings.Fields(agent)
+		if len(products) == 0 || products[0] != want || len(products) > 2 {
+			t.Errorf("%s was sent User-Agent %q, want %s, then at most the SDK's", path, agent, want)
 		}
 	}
 }

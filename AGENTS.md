@@ -24,6 +24,13 @@ lookup, result cache or field selection.
   There is no default command to fall into.
 - **No color.** Nothing prints any, so there is no `--nocolor` and no
   `fatih/color`.
+- **Every SDK client is built with `namedHTTPClient()`**, which puts
+  `internetdata-cli/<version>` first in the User-Agent, file transfer included,
+  and keeps the SDK's 30 s timeout, which applies only when no client is passed.
+  `NewClient` and `signInAPI` are the two today, and
+  `TestEveryRequestNamesTheCLIFirst` covers only those: a third
+  `internetdata.New` without it sends Go's default. sdk-go v2.9.1 sets no
+  User-Agent of its own, so the CLI's name is the whole header until one does.
 
 ## Channel state (2026-11-12, v1.4.13)
 

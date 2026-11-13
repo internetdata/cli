@@ -103,6 +103,7 @@ func revokeToken(ctx context.Context, token string) error {
 // keeps any key off these requests regardless; there is simply none to give.
 func signInAPI() (*internetdata.OauthAPI, error) {
 	client, err := internetdata.New(
+		internetdata.WithHTTPClient(namedHTTPClient()),
 		internetdata.WithBaseURL(authBaseURL()),
 		internetdata.WithRetries(resolveRetries()),
 	)

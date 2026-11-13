@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"time"
 
 	internetdata "github.com/internetdata/sdk-go/v2"
 )
@@ -18,6 +20,7 @@ func NewClient() (*Client, error) {
 	key, _ := gConfig.ResolveKey()
 
 	opts := []internetdata.Option{
+		internetdata.WithHTTPClient(namedHTTPClient()),
 		internetdata.WithRetries(resolveRetries()),
 	}
 	if key != "" {
@@ -34,6 +37,29 @@ func NewClient() (*Client, error) {
 	}
 	touchSession(key)
 	return &Client{api: api, key: key}, nil
+}
+
+// namedHTTPClient is the SDK's own default, a 30 second timeout, on a transport
+// that names this CLI on every request ahead of the SDK.
+func namedHTTPClient() *http.Client {
+	return &http.Client{Timeout: 30 * time.Second, Transport: agentTransport{next: http.DefaultTransport}}
+}
+
+// agentTransport puts internetdata-cli/<version> first in the User-Agent, ahead
+// of any the SDK has already set.
+type agentTransport struct {
+	next http.RoundTripper
+}
+
+func (t agentTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// A RoundTripper must not modify the request it is given.
+	named := req.Clone(req.Context())
+	agent := "internetdata-cli/" + version
+	if sdk := req.Header.Get("User-Agent"); sdk != "" {
+		agent += " " + sdk
+	}
+	named.Header.Set("User-Agent", agent)
+	return t.next.RoundTrip(named)
 }
 
 // HasKey reports whether this invocation is authenticated.
