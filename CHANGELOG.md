@@ -2,6 +2,13 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.4.14 - 2026-11-13
+
+### Fixes
+
+- Take pflag v1.1.0: a 32-bit build refuses an int flag it cannot hold ([`1868f61`](https://github.com/internetdata/cli/commit/1868f615e80162c17497b895d160bd9160d054ba))
+- Name the CLI in every request's User-Agent ([`5be3151`](https://github.com/internetdata/cli/commit/5be3151d937ebea437b033c819b07092bd060823))
+
 ## 1.4.13 - 2026-11-11
 
 ### Fixes
