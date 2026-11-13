@@ -34,16 +34,12 @@ const clientID = "internetdata-cli"
 // Notably absent is anything that could CREATE a credential.
 const loginScopes = "account.read apikeys.read apikeys.reveal"
 
-// authBaseURL is where the authorization server lives.
-//
-// It is simply the API base URL, because the authorization server is mounted on
-// PATHS of the API host (`/oauth/`, `/.well-known/`) rather than on a host of
-// its own. That is the whole reason this function is three lines: there is no
-// hostname to derive, so there is nothing here to get wrong.
-//
-// It also means a session pointed at another deployment authenticates against
-// THAT deployment automatically, rather than depending on this program agreeing
-// with the server about how to rewrite a host.
+// authBaseURL is the API base URL the sign-in client is built with, which is
+// not where the authorization server lives: that is mounted on the APEX, and the
+// SDK's client.Oauth derives it from this, `api.` dropped and `api-<env>.`
+// becoming `<env>.`, and any other host used as given. So the derivation is the
+// SDK's alone, and a session pointed at another deployment authenticates
+// against that deployment without this program rewriting a host of its own.
 func authBaseURL() string {
 	if base := gConfig.ResolveBaseURL(); base != "" {
 		return strings.TrimSuffix(base, "/")

@@ -17,10 +17,10 @@ import (
 // production - the one way this could quietly cost someone a real account they
 // did not want. Anything we do not recognize falls back to production.
 //
-// The API is served at the APEX, so there is usually no `api` label to swap
-// for `app`: the apex's console is `app.` on it, and a deployment leading the
-// host moves behind `app-`. The same rule as the authorization server's own
-// hand-off to the console.
+// The APEX answers the database paths too, so a session may hold it, and it has
+// no `api` label to swap for `app`: the apex's console is `app.` on it, and a
+// deployment leading the host moves behind `app-`. The same rule as the
+// authorization server's own hand-off to the console.
 func signupURL() string {
 	const prod = "https://app.internetdata.io/auth/signup"
 	base := gConfig.ResolveBaseURL()

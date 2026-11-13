@@ -5,24 +5,27 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	internetdata "github.com/internetdata/sdk-go/v2"
 )
 
-// The authorization server is mounted on PATHS of the API host, so this is the
-// API base URL and nothing else. The earlier shape derived an `auth.<brand>`
-// hostname from it by string surgery, which is exactly the sort of thing that
-// works in production and silently points at the wrong deployment everywhere
-// else - so these cases exist to keep the derivation from creeping back.
+// The sign-in client is built on the API base URL and nothing else: the SDK
+// derives the apex the authorization server is mounted on, so this program must
+// not rewrite a host itself. An earlier shape derived an `auth.<brand>` hostname
+// by string surgery, which works in production and silently points at the wrong
+// deployment everywhere else - so these cases keep a derivation from creeping
+// back.
 func TestAuthBaseURL(t *testing.T) {
 	tests := []struct {
 		name string
 		base string
 		want string
 	}{
-		{"unset falls back to production", "", "https://internetdata.io"},
+		{"unset falls back to production", "", "https://api.internetdata.io"},
 		// A hyphenated first label is the shape a non-production deployment
 		// takes, and the old code rewrote exactly that away. Kept generic: this
 		// repo is public.
@@ -48,6 +51,62 @@ func TestAuthBaseURL(t *testing.T) {
 		})
 	}
 }
+
+// A session's calls go to its API host, all but the sign-in, which the SDK sends
+// to that host's apex, where the authorization server is mounted.
+func TestSignInGoesToTheApexAndTheRestToTheAPIHost(t *testing.T) {
+	var mu sync.Mutex
+	hosts := map[string]string{}
+	savedTransport := http.DefaultTransport
+	t.Cleanup(func() { http.DefaultTransport = savedTransport })
+	http.DefaultTransport = roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		mu.Lock()
+		hosts[r.URL.Path] = r.URL.Host
+		mu.Unlock()
+		return &http.Response{
+			StatusCode: http.StatusBadRequest,
+			Header:     http.Header{"Content-Type": {"application/json"}},
+			Body:       io.NopCloser(strings.NewReader(`{"error":"slow_down"}`)),
+			Request:    r,
+		}, nil
+	})
+
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("INTERNETDATA_API_KEY", "k-test")
+	t.Setenv("INTERNETDATA_SESSION", "")
+	savedConfig, savedBaseURL, savedRetries := gConfig, fBaseURL, fRetries
+	t.Cleanup(func() { gConfig, fBaseURL, fRetries = savedConfig, savedBaseURL, savedRetries })
+	gConfig, fBaseURL, fRetries = NewConfig(), "https://api-eu.example.test", 0
+
+	if _, err := startDeviceAuth(t.Context()); err == nil {
+		t.Fatal("the sign-in start succeeded against an origin that refuses it")
+	}
+	client, err := NewClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := client.Database().List(t.Context()); err == nil {
+		t.Fatal("the listing succeeded against an origin that refuses it")
+	}
+
+	if len(hosts) != 2 {
+		t.Fatalf("saw requests to %v, want a sign-in start and a listing", hosts)
+	}
+	for path, host := range hosts {
+		want := "api-eu.example.test"
+		if strings.HasPrefix(path, "/oauth/") {
+			want = "eu.example.test"
+		}
+		if host != want {
+			t.Errorf("%s went to %s, want %s", path, host, want)
+		}
+	}
+}
+
+// roundTripFunc is a transport answering every request with a function.
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 // What a person reads when the server refuses a sign-in, and a revoke the
 // server failed reported as failed rather than read as success.

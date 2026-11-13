@@ -161,7 +161,7 @@ $ internetdata session use work
 $ internetdata --session work db list    # one command, without switching
 ```
 
-`--base-url` points a session at another deployment of the API; a session without one talks to `https://internetdata.io`.
+`--base-url` points a session at another deployment of the API; a session without one talks to `https://api.internetdata.io`, and signs in at `https://internetdata.io`.
 
 A key can also come from `--key` or the `INTERNETDATA_API_KEY` environment variable, in that order of precedence. The config file is written `0600` inside a `0700` directory.
 
@@ -172,7 +172,7 @@ $ internetdata whoami
 key          mk_1************************abcd
 from         session default
 session      default
-api          https://internetdata.io
+api          https://api.internetdata.io
 
 DATABASE   STANDING  LICENSE   TERM
 vpn_ip     licensed  standard  renews 2027-01-04

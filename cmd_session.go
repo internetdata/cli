@@ -120,7 +120,7 @@ func sessionShow(name string) error {
 	}
 	api := s.BaseURL
 	if api == "" {
-		api = "default (https://internetdata.io)"
+		api = "default (https://api.internetdata.io)"
 	}
 	fmt.Printf("name        %s\n", name)
 	fmt.Printf("key         %s\n", maskKey(s.Key))
