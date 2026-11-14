@@ -51,22 +51,22 @@ describes and downloads the databases.
   `app-E.internetdata.io`, and an `api`-labeled host keeps the sibling shape.
   `cmd_signup_test.go` pins it.
 
-## Channel state (2026-11-14, v1.5.1)
+## Channel state (2026-11-14, v1.5.2)
 
 GitHub release (its notes are the version's CHANGELOG.md section), ghcr
-(public, anonymous pull, `1.5.1` and `latest`), apt and `go install` were each
-verified serving 1.5.1. The image carries OCI labels for the site, docs, source
+(public, anonymous pull, `1.5.2` and `latest`), apt and `go install` were each
+verified serving 1.5.2. The image carries OCI labels for the site, docs, source
 and license, and its index's description annotation is what GitHub's package
 page shows. apt is signed since 2026-11-10: `InRelease`, `Release.gpg` and
 `public.key` (fingerprint `590AB7732517F95B056ED35317EA110D248C1B73`), and the
-README installs it with `signed-by`; a fresh bookworm installed 1.5.1 that way.
-Its index lists all 23 versions, 1.0.0 to 1.5.1. The tap's formula names 1.5.1
+README installs it with `signed-by`; a fresh bookworm installed 1.5.2 that way.
+Its index lists all 24 versions, 1.0.0 to 1.5.2. The tap's formula names 1.5.2
 with the release's own checksums. The tap's SECURITY.md and README are kept by
 hand: the release job stages only `Formula/`. Chocolatey approved every version
-through 1.4.14, each after a human's review; 1.5.0 and 1.5.1 are in moderation.
+through 1.5.0, each after a human's review; 1.5.1 and 1.5.2 are in moderation.
 winget took its first version, 1.4.7 as `InternetData.CLI`, on 2026-11-03
 (microsoft/winget-pkgs#441588), and every later one is the release's `winget`
 job, which must go green; 1.5.0 merged, with its locale's `Description`
 rewritten on the PR's branch for the lookups, since the job copies the last
-version's forward, and 1.5.1's PR is #480032. The job posts the CLA agree when
-a PR reads `Needs-CLA`, which none since 1.4.12 has.
+version's forward; 1.5.1's PR is #480032 and 1.5.2's #480131. The job posts
+the CLA agree when a PR reads `Needs-CLA`, which none since 1.4.12 has.
