@@ -35,10 +35,14 @@ describes and downloads the databases.
   addresses up and is refused by every database call, as a 401. So database
   errors go through `explainDatabase`, which names the scope, an address the
   allowed addresses leave out and the license apart, and `checkKey` validates
-  a key at login with a lookup, never the listing. Since 2026-11-13 a key its
-  owner took `ip.lookup` from is refused every lookup and `whoami` as a 403, so
-  login refuses it unless `--no-check`. A lookup's 403 is never a plan, and the
-  API's message names its reason, so `explain` adds no hint to one.
+  a key at login with a lookup, never the listing first. Since 2026-11-13 a key
+  its owner took `ip.lookup` from is refused every lookup and `whoami` as a 403,
+  so login asks the listing after a 403 and stores a key that answers it, with a
+  warning. Never on an `http:` base URL: the listing's host redirects plain HTTP
+  to HTTPS and Go keeps the key across it, so a build without that guard stored
+  a key the lookup refused for plain HTTP (2026-11-14). A lookup's 403 is never
+  a plan, and the API's message names its reason, so `explain` adds no hint to
+  one.
 - **Calls go to `https://api.internetdata.io`, sign-in to the apex**, which the
   SDK's `client.Oauth` derives from the base URL (`api.` dropped, `api-<env>.`
   becoming `<env>.`); `TestSignInGoesToTheApexAndTheRestToTheAPIHost` pins
