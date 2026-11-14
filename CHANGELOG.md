@@ -2,6 +2,13 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.5.1 - 2026-11-14
+
+### Fixes
+
+- Drop the plan or license hint from a refused key's 403 ([`c187e0a`](https://github.com/internetdata/cli/commit/c187e0a1d06fff71af3ea88a7b58c6b74c3200aa))
+- Name the site, docs, source and license on the container image ([`53efbfb`](https://github.com/internetdata/cli/commit/53efbfbf5ba14c2b368eb680ad84e97e359cb7da))
+
 ## 1.5.0 - 2026-11-13
 
 ### Breaking changes
