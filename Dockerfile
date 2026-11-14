@@ -21,6 +21,15 @@ RUN --mount=type=cache,target=/go/pkg/mod/ \
 # the config and cache, which the nonroot image provides at /home/nonroot.
 FROM gcr.io/distroless/static-debian12:nonroot
 
+# GitHub's package page reads source and licenses; url and documentation are
+# the standard keys for the site and the docs.
+LABEL org.opencontainers.image.title="InternetData CLI" \
+      org.opencontainers.image.vendor="InternetData" \
+      org.opencontainers.image.url="https://internetdata.io" \
+      org.opencontainers.image.documentation="https://docs.internetdata.io/integrations/cli" \
+      org.opencontainers.image.source="https://github.com/internetdata/cli" \
+      org.opencontainers.image.licenses="MIT"
+
 COPY --from=builder /dist/internetdata /usr/local/bin/internetdata
 
 ENTRYPOINT ["/usr/local/bin/internetdata"]

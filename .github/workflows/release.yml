@@ -151,6 +151,10 @@ jobs:
           # until they are reading a bug report.
           build-args: |
             VERSION=${{ needs.version.outputs.version }}
+          # A multi-arch image's description on GitHub's package page is its
+          # index's annotation, which no Dockerfile LABEL reaches.
+          annotations: |
+            index:org.opencontainers.image.description=Official CLI for the InternetData API (https://internetdata.io). Look up any IP address, AS or domain, and download the IP databases your organization licenses. Docs: https://docs.internetdata.io/integrations/cli
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
