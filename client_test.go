@@ -37,6 +37,22 @@ func TestExplainDatabase(t *testing.T) {
 	}
 }
 
+// A lookup's 403 refuses a valid key for how it was used, and the spec's three
+// reasons are the API's messages here. None is a plan or a license, so explain
+// adds nothing to them.
+func TestExplainLeavesALookup403ToTheAPI(t *testing.T) {
+	for _, msg := range []string{
+		"source address not allowed for this API key",
+		"API key lacks the ip.lookup scope; add Lookups to it in the console",
+		"API key sent over plain HTTP; use https://",
+	} {
+		err := &internetdata.Error{Kind: internetdata.KindForbidden, Message: msg, StatusCode: 403}
+		if got := explain(err).Error(); got != err.Error() {
+			t.Errorf("explain(%q) = %q, want the SDK's error alone", msg, got)
+		}
+	}
+}
+
 // Both of the CLI's SDK clients, the keyed one and the keyless sign-in one, name
 // the CLI first and the SDK after it, on a lookup, the API's other calls and the
 // file transfer alike, so the API can tell this CLI's traffic, and its version,

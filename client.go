@@ -236,7 +236,9 @@ func resolveRetries() int {
 // explain turns an SDK error into something worth reading at a terminal.
 //
 // The SDK's own message is accurate and says nothing about what to DO, which
-// for the two authentication failures is the entire question.
+// for the two authentication failures is the entire question. A 403 gets no
+// hint: it refuses a valid key for an address its allowed addresses leave out,
+// a missing ip.lookup scope or plain HTTP, and the API's message names which.
 func explain(err error) error {
 	var apiErr *internetdata.Error
 	if !errors.As(err, &apiErr) {
@@ -245,8 +247,6 @@ func explain(err error) error {
 	switch apiErr.Kind {
 	case internetdata.KindUnauthorized:
 		return fmt.Errorf("%w\nthe API key was not accepted; check `%s whoami`", err, progBase)
-	case internetdata.KindForbidden:
-		return fmt.Errorf("%w\nthis key's plan or license does not cover that", err)
 	case internetdata.KindQuotaExceeded:
 		return fmt.Errorf("%w\nsee `%s whoami` for the allowance and when it resets", err, progBase)
 	case internetdata.KindRateLimited:
