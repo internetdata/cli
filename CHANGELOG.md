@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.5.2 - 2026-11-14
+
+### Fixes
+
+- login: store a key that downloads databases but cannot look up ([`8f626ea`](https://github.com/internetdata/cli/commit/8f626ead617ff592bbe5ebc5ccbb3a0cdb697339))
+
 ## 1.5.1 - 2026-11-14
 
 ### Fixes
