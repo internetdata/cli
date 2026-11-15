@@ -36,7 +36,8 @@ describes and downloads the databases.
   errors go through `explainDatabase`, which names the scope, an address the
   allowed addresses leave out and the license apart, and `checkKey` validates
   a key at login with a lookup, never the listing first. Since 2026-11-13 a key
-  its owner took `ip.lookup` from is refused every lookup and `whoami` as a 403,
+  its owner took `ip.lookup` from is refused every lookup as a 403 (not
+  `whoami`: the API's source checks no scope on the account call, 2026-11-15),
   so login asks the listing after a 403 and stores a key that answers it, with a
   warning. Never on an `http:` base URL: the listing's host redirects plain HTTP
   to HTTPS and Go keeps the key across it, so a build without that guard stored
@@ -51,7 +52,7 @@ describes and downloads the databases.
   `app-E.internetdata.io`, and an `api`-labeled host keeps the sibling shape.
   `cmd_signup_test.go` pins it.
 
-## Channel state (2026-11-14, v1.5.2)
+## Channel state (2026-11-15, v1.5.2)
 
 GitHub release (its notes are the version's CHANGELOG.md section), ghcr
 (public, anonymous pull, `1.5.2` and `latest`), apt and `go install` were each
@@ -63,10 +64,10 @@ README installs it with `signed-by`; a fresh bookworm installed 1.5.2 that way.
 Its index lists all 24 versions, 1.0.0 to 1.5.2. The tap's formula names 1.5.2
 with the release's own checksums. The tap's SECURITY.md and README are kept by
 hand: the release job stages only `Formula/`. Chocolatey approved every version
-through 1.5.0, each after a human's review; 1.5.1 and 1.5.2 are in moderation.
+through 1.5.2, each after a human's review.
 winget took its first version, 1.4.7 as `InternetData.CLI`, on 2026-11-03
 (microsoft/winget-pkgs#441588), and every later one is the release's `winget`
 job, which must go green; 1.5.0 merged, with its locale's `Description`
 rewritten on the PR's branch for the lookups, since the job copies the last
-version's forward; 1.5.1's PR is #480032 and 1.5.2's #480131. The job posts
+version's forward; 1.5.1 (#480032) and 1.5.2 (#480131) merged. The job posts
 the CLA agree when a PR reads `Needs-CLA`, which none since 1.4.12 has.
