@@ -52,7 +52,7 @@ const paidAnswer = `{
   "whois":{"id":"M247-LTD-Vienna","name":"M247 Vienna","org":"ORG-MES59-RIPE","country":"AT",
     "status":"LEGACY","source":"ripe","domain":"m247.ro","abuse_email":"abuse@m247.ro","asn":9009},
   "rwhois":{"id":"","name":"","country":"","source":"","domain":"","abuse_email":""},
-  "hosted_domains":{"total":0}
+  "hosted_domains":{"total":0,"domains":[]}
 }`
 
 // proxyAnswer carries three proxy families' detail objects populated, as the API
@@ -416,6 +416,20 @@ func TestFlagsAndObjectsFollowColumns(t *testing.T) {
 		if !seen[detail] && !slices.Contains(Columns, detail) && f != "is_anycast" {
 			t.Errorf("%s has no detail in Columns", f)
 		}
+	}
+}
+
+// hosted_domains.domains sits right after hosted_domains.total in CSV's columns,
+// where a reader looks for the names the count counts (chosen for 1.6.0),
+// and its cell holds the list as JSON.
+func TestHostedDomainsFollowTheirTotal(t *testing.T) {
+	i := slices.Index(Columns, "hosted_domains.total")
+	if i < 0 || i+1 == len(Columns) || Columns[i+1] != "hosted_domains.domains" {
+		t.Errorf("hosted_domains.total is not followed by hosted_domains.domains")
+	}
+	rec := flattenJSON(t, `{"hosted_domains":{"total":2,"domains":["a.example","b.example"]}}`)
+	if c := rec.Get("hosted_domains.domains"); c.Text != `["a.example","b.example"]` {
+		t.Errorf("domains: %q", c.Text)
 	}
 }
 

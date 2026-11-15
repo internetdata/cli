@@ -20,7 +20,10 @@ describes and downloads the databases.
   digits, so `8.8.8.888` is refused here rather than sent).
 - **Each kind has its own columns**: `lib.Columns`, `ASNColumns` and
   `DomainColumns`, each append-only, as `lib.Columns` says, and the writers take
-  the kind with every answer. A CSV's header is its first answer's kind, so a
+  the kind with every answer. One exception was chosen, not followed: 1.6.0
+  put `hosted_domains.domains` right after its total, moving `trial_expired`
+  one column right, so ask again for the next field rather than place it by
+  that precedent. A CSV's header is its first answer's kind, so a
   CSV of two kinds is refused (`lib.ErrMixedCSV`), before any request when the
   arguments alone mix them. A `--field` is checked against the kinds the
   arguments ask for (`answerKinds`): addresses always, as stdin may add them.

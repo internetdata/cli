@@ -30,7 +30,9 @@ const (
 // the CSV contract. A caller's column indexes must not move because the API
 // grew a field, and a new field appearing silently at the end is far easier to
 // absorb than one appearing in the middle. The readable block lists each one
-// with its object's other fields all the same.
+// with its object's other fields all the same. One exception was chosen: 1.6.0
+// put hosted_domains.domains right after hosted_domains.total, moving
+// trial_expired one column right.
 var Columns = []string{
 	"ip",
 	"is_bogon",
@@ -91,7 +93,7 @@ var Columns = []string{
 	"whois.id", "whois.name", "whois.org", "whois.country", "whois.status", "whois.source",
 	"whois.domain", "whois.abuse_email", "whois.asn",
 	"rwhois.id", "rwhois.name", "rwhois.country", "rwhois.source", "rwhois.domain", "rwhois.abuse_email",
-	"hosted_domains.total",
+	"hosted_domains.total", "hosted_domains.domains",
 
 	// On a free-plan key's answers alone: false for its daily trial's lookups with
 	// every field, true once they are spent and the answer is Unlimited's.
