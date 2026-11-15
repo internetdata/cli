@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.6.0 - 2026-11-15
+
+### Breaking changes
+
+- Take sdk-go v2.12.0, and print hosted_domains.domains beside its total ([`7894c6e`](https://github.com/internetdata/cli/commit/7894c6e01434d6d1e5769903278e88217e045d15))
+
 ## 1.5.2 - 2026-11-14
 
 ### Fixes
