@@ -67,11 +67,11 @@ README installs it with `signed-by`; a fresh bookworm installed 1.6.0 that way.
 Its index lists all 25 versions, 1.0.0 to 1.6.0. The tap's formula names 1.6.0
 with the release's own checksums. The tap's SECURITY.md and README are kept by
 hand: the release job stages only `Formula/`. Chocolatey approved every version
-through 1.5.2, each after a human's review; 1.6.0 is in moderation.
+through 1.6.0, each after a human's review.
 winget took its first version, 1.4.7 as `InternetData.CLI`, on 2026-11-03
 (microsoft/winget-pkgs#441588), and every later one is the release's `winget`
 job, which must go green; 1.5.0 merged, with its locale's `Description`
 rewritten on the PR's branch for the lookups, since the job copies the last
-version's forward; every version through 1.5.2 merged, and 1.6.0 is #480924.
+version's forward; every version through 1.6.0 merged (#480924).
 The job posts the CLA agree when a PR reads `Needs-CLA`, which none since
 1.4.12 has.
