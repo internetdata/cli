@@ -2,6 +2,16 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.7.0 - 2026-11-16
+
+### Breaking changes
+
+- Take sdk-go v2.13.0: an AS's rank, neighbors and hosted domains ([`968f852`](https://github.com/internetdata/cli/commit/968f8528ff1823aef0e4710bb3d620ca7b63e853))
+
+### Fixes
+
+- whoami names the plan as the API serves it ([`fe26d59`](https://github.com/internetdata/cli/commit/fe26d5900cf6b00934e63a643a4d312ff2018fb9))
+
 ## 1.6.0 - 2026-11-15
 
 ### Breaking changes
