@@ -5,6 +5,7 @@ package lib
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -119,7 +120,9 @@ var Objects = []string{
 
 // ASNColumns is every field an AS's answer can carry, in CSV's order, under the
 // same rule as Columns. The whois record is keyed as the API documents it, and
-// prefixes is one column holding the list.
+// prefixes, upstreams, peers and downstreams are each one column holding the list.
+// The same exception was chosen: 1.7.0 put rank to hosted_domains.domains after
+// prefixes, moving trial_expired ten columns right.
 var ASNColumns = []string{
 	"asn", "name", "country", "registry", "allocated", "domain",
 	"type", "num_ips", "num_prefixes4", "num_prefixes6", "rpki_valid", "rpki_invalid", "rpki_not_found",
@@ -132,6 +135,8 @@ var ASNColumns = []string{
 	"whois.tech_kind", "whois.tech_country", "whois.tech_city", "whois.org_name", "whois.org_address",
 	"whois.org_country", "whois.org_city", "whois.abuse_validated", "whois.abuse_unvalidated_since",
 	"prefixes",
+	"rank", "tier1", "num_upstreams", "upstreams", "num_peers", "peers", "num_downstreams", "downstreams",
+	"hosted_domains.total", "hosted_domains.domains",
 	"trial_expired",
 }
 
@@ -345,9 +350,9 @@ func (r Record) listed(s schema, absent bool) []string {
 			}
 		}
 	}
-	// A top-level field that is neither a flag nor an object, as trial_expired.
+	// A field no object holds, as trial_expired or an AS's hosted_domains, in the columns' order.
 	for _, col := range s.columns {
-		if !strings.Contains(col, ".") {
+		if obj, _, dotted := strings.Cut(col, "."); !dotted || !slices.Contains(s.objects, obj) {
 			emit(col)
 		}
 	}

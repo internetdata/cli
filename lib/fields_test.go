@@ -74,7 +74,7 @@ const asnUnlimitedAnswer = `{"asn":9009,"name":"M247 Europe SRL","country":"RO",
 	`"allocated":"2005-06-06","domain":"m247global.com"}`
 
 // asnPaidAnswer is an AS's answer on a paid plan: the counts, the whois record
-// keyed as the API documents it, and the prefixes.
+// keyed as the API documents it, the prefixes, the neighbors and the hosted domains.
 const asnPaidAnswer = `{
   "asn":9009,"name":"M247 Europe SRL","country":"RO","registry":"ripe","allocated":"2005-06-06",
   "domain":"m247global.com","type":"hosting","num_ips":1615872,"num_prefixes4":4510,"num_prefixes6":807,
@@ -90,7 +90,10 @@ const asnPaidAnswer = `{
     "status":"ASSIGNED","tech":"","tech_city":"","tech_country":"","tech_email":"","tech_kind":"",
     "tech_name":"","tech_phone":"","updated":"2023-03-15"},
   "prefixes":[{"prefix":"2.56.16.0/22","peer_count":17,"rpki_status":"not_found","first_seen":"2026-10-02",
-    "country":"VN","size":1024,"other_origins":[]}]
+    "country":"VN","size":1024,"other_origins":[]}],
+  "rank":341,"tier1":false,"num_upstreams":18,"upstreams":[174,260],"num_peers":1018,"peers":[42,286],
+  "num_downstreams":146,"downstreams":[3210,3503],
+  "hosted_domains":{"total":51759,"domains":["fotopedia.com","kissfm.ro"]}
 }`
 
 // domainPaidAnswer is a domain's answer on a paid plan: its records, its
@@ -226,8 +229,9 @@ func TestAllListsEveryColumn(t *testing.T) {
 }
 
 // An AS lists its registration, then its counts, then its whois record, then
-// its prefixes; a domain its flags, then its records, ranges and disposable
-// detail. Each in its own order, never in an address's.
+// its prefixes, neighbors and hosted domains; a domain its flags, then its
+// records, ranges and disposable detail. Each in its own order, never in an
+// address's.
 func TestPresentListsAnASAndADomainInTheirOwnOrder(t *testing.T) {
 	gotASN := flattenJSON(t, asnPaidAnswer).Present(KindASN)
 	if !reflect.DeepEqual(gotASN, ASNColumns[:len(ASNColumns)-1]) {
