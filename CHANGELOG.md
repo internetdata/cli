@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.8.0 - 2026-11-17
+
+### Features
+
+- Take sdk-go v2.14.0: cap_reached on a paid key's answers ([`bb674fd`](https://github.com/internetdata/cli/commit/bb674fd00b6a8ed971b0a7f8227a82d9886e946e))
+
 ## 1.7.0 - 2026-11-16
 
 ### Breaking changes
