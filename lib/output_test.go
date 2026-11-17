@@ -135,30 +135,37 @@ func TestCSVHoldsOneKind(t *testing.T) {
 	}
 }
 
-// trial_expired came last, so no column moved, and the readable block prints it
-// after the answer's fields, where a trial key's user reads whether the day's
-// full lookups are spent. A paid answer carries none, so prints none.
-func TestTrialExpiredComesLast(t *testing.T) {
-	const spent = `{"ip":"1.1.1.1","is_tor":false,"is_bogon":false,"trial_expired":true}`
+// trial_expired and cap_reached came last, so no column moved, and the readable
+// block prints each after the answer's fields, where a user reads whether the
+// answer is Unlimited's: a trial key's because the day's full lookups are spent,
+// a paid key's because its organization's overage cap is reached. An answer
+// carries at most one of the two, so prints at most one.
+func TestPlanStateComesLast(t *testing.T) {
+	const (
+		spent  = `{"ip":"1.1.1.1","is_tor":false,"is_bogon":false,"trial_expired":true}`
+		capped = `{"ip":"2.2.2.2","is_tor":false,"is_bogon":false,"cap_reached":true}`
+	)
 	for _, columns := range [][]string{Columns, ASNColumns, DomainColumns} {
-		if columns[len(columns)-1] != "trial_expired" {
-			t.Fatalf("the last column is %s", columns[len(columns)-1])
+		if tail := strings.Join(columns[len(columns)-2:], ","); tail != "trial_expired,cap_reached" {
+			t.Fatalf("the last columns are %s", tail)
 		}
 	}
-	lines := strings.Split(strings.TrimSpace(render(t, FormatPretty, Opts{}, spent)), "\n")
-	name, value, _ := strings.Cut(lines[len(lines)-1], " ")
-	if name != "trial_expired" || strings.TrimSpace(value) != "true" {
-		t.Errorf("the block ends %q", lines[len(lines)-1])
+	for _, c := range []struct{ answer, field string }{{spent, "trial_expired"}, {capped, "cap_reached"}} {
+		lines := strings.Split(strings.TrimSpace(render(t, FormatPretty, Opts{}, c.answer)), "\n")
+		name, value, _ := strings.Cut(lines[len(lines)-1], " ")
+		if name != c.field || strings.TrimSpace(value) != "true" {
+			t.Errorf("the block ends %q, want %s true", lines[len(lines)-1], c.field)
+		}
 	}
 	if got := render(t, FormatPretty, Opts{}, paidAnswer); strings.Contains(got, "trial_expired") {
 		t.Errorf("a paid answer printed trial_expired:\n%s", got)
 	}
-	rows := strings.Split(strings.TrimSpace(render(t, FormatCSV, Opts{}, spent, paidAnswer)), "\n")
-	if !strings.HasSuffix(rows[1], ",true") || !strings.HasSuffix(rows[2], ",") {
-		t.Errorf("the trial row ends %q and the paid one %q", rows[1][len(rows[1])-6:], rows[2][len(rows[2])-6:])
+	rows := strings.Split(strings.TrimSpace(render(t, FormatCSV, Opts{}, spent, capped)), "\n")
+	if !strings.HasSuffix(rows[1], ",true,") || !strings.HasSuffix(rows[2], ",,true") {
+		t.Errorf("the trial row ends %q and the capped one %q", rows[1][len(rows[1])-6:], rows[2][len(rows[2])-6:])
 	}
-	asn := renderOne(t, KindASN, "AS9009", FormatPretty, Opts{}, `{"asn":9009,"name":"M","trial_expired":false}`)
-	if !strings.HasSuffix(strings.TrimSpace(asn), "trial_expired  false") {
+	asn := renderOne(t, KindASN, "AS9009", FormatPretty, Opts{}, `{"asn":9009,"name":"M","cap_reached":false}`)
+	if !strings.HasSuffix(strings.TrimSpace(asn), "cap_reached  false") {
 		t.Errorf("the AS block ends:\n%s", asn)
 	}
 }

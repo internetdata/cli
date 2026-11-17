@@ -52,7 +52,8 @@ const paidAnswer = `{
   "whois":{"id":"M247-LTD-Vienna","name":"M247 Vienna","org":"ORG-MES59-RIPE","country":"AT",
     "status":"LEGACY","source":"ripe","domain":"m247.ro","abuse_email":"abuse@m247.ro","asn":9009},
   "rwhois":{"id":"","name":"","country":"","source":"","domain":"","abuse_email":""},
-  "hosted_domains":{"total":0,"domains":[]}
+  "hosted_domains":{"total":0,"domains":[]},
+  "cap_reached":false
 }`
 
 // proxyAnswer carries three proxy families' detail objects populated, as the API
@@ -93,7 +94,8 @@ const asnPaidAnswer = `{
     "country":"VN","size":1024,"other_origins":[]}],
   "rank":341,"tier1":false,"num_upstreams":18,"upstreams":[174,260],"num_peers":1018,"peers":[42,286],
   "num_downstreams":146,"downstreams":[3210,3503],
-  "hosted_domains":{"total":51759,"domains":["fotopedia.com","kissfm.ro"]}
+  "hosted_domains":{"total":51759,"domains":["fotopedia.com","kissfm.ro"]},
+  "cap_reached":false
 }`
 
 // domainPaidAnswer is a domain's answer on a paid plan: its records, its
@@ -107,7 +109,8 @@ const domainPaidAnswer = `{
     "ns":[{"host":"ns1.example.com","last_seen":"2026-11-08"}],"cname":[]},
   "ip_ranges":{"domain":"example.com","redirects_to":"","total":1,"ipv4":256,
     "ranges":[{"range":"192.0.2.0/24","name":"EXAMPLE-NET","country":"US"}]},
-  "disposable":{}
+  "disposable":{},
+  "cap_reached":false
 }`
 
 func flattenJSON(t *testing.T, body string) Record {
@@ -234,12 +237,13 @@ func TestAllListsEveryColumn(t *testing.T) {
 // address's.
 func TestPresentListsAnASAndADomainInTheirOwnOrder(t *testing.T) {
 	gotASN := flattenJSON(t, asnPaidAnswer).Present(KindASN)
-	if !reflect.DeepEqual(gotASN, ASNColumns[:len(ASNColumns)-1]) {
-		t.Errorf("AS: got %v\nwant %v", gotASN, ASNColumns[:len(ASNColumns)-1])
+	wantASN := slices.DeleteFunc(slices.Clone(ASNColumns), func(c string) bool { return c == "trial_expired" })
+	if !reflect.DeepEqual(gotASN, wantASN) {
+		t.Errorf("AS: got %v\nwant %v", gotASN, wantASN)
 	}
 	gotDomain := flattenJSON(t, domainPaidAnswer).Present(KindDomain)
 	records := DomainColumns[:slices.Index(DomainColumns, "disposable.confidence")]
-	wantDomain := append(append([]string{}, records...), "disposable")
+	wantDomain := append(append([]string{}, records...), "disposable", "cap_reached")
 	if !reflect.DeepEqual(gotDomain, wantDomain) {
 		t.Errorf("domain: got %v\nwant %v", gotDomain, wantDomain)
 	}

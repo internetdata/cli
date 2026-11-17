@@ -99,6 +99,9 @@ var Columns = []string{
 	// On a free-plan key's answers alone: false for its daily trial's lookups with
 	// every field, true once they are spent and the answer is Unlimited's.
 	"trial_expired",
+	// On a paid key's answers alone: false while the answer has every field, true
+	// once its organization's overage cap is reached and the answer is Unlimited's.
+	"cap_reached",
 }
 
 // Flags are an address's top-level booleans, which is what a summary line shows.
@@ -137,7 +140,7 @@ var ASNColumns = []string{
 	"prefixes",
 	"rank", "tier1", "num_upstreams", "upstreams", "num_peers", "peers", "num_downstreams", "downstreams",
 	"hosted_domains.total", "hosted_domains.domains",
-	"trial_expired",
+	"trial_expired", "cap_reached",
 }
 
 // DomainColumns is every field a domain's answer can carry, in CSV's order,
@@ -148,7 +151,7 @@ var DomainColumns = []string{
 	"dns.a", "dns.aaaa", "dns.mx", "dns.ns", "dns.cname",
 	"ip_ranges.domain", "ip_ranges.redirects_to", "ip_ranges.total", "ip_ranges.ipv4", "ip_ranges.ranges",
 	"disposable.confidence", "disposable.providers", "disposable.first_seen", "disposable.last_seen",
-	"trial_expired",
+	"trial_expired", "cap_reached",
 }
 
 // schema is how one kind of answer is listed: its columns, the fields the

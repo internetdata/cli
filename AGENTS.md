@@ -23,9 +23,10 @@ describes and downloads the databases.
   the kind with every answer. Twice a field went in before `trial_expired`
   instead, each chosen over appending it: 1.6.0's `hosted_domains.domains`
   beside its total, and 1.7.0's ten AS fields, `rank` to
-  `hosted_domains.domains`, after `prefixes`. So `trial_expired` is still every
-  kind's last column (`TestTrialExpiredComesLast`); ask again for the next
-  field rather than place it by either. A CSV's header is its first answer's
+  `hosted_domains.domains`, after `prefixes`. 1.8.0 appended `cap_reached`
+  after `trial_expired`, the spec's order, so the two plan-state flags end
+  every kind's columns (`TestPlanStateComesLast`); ask again for the next field
+  rather than place it by any of these. A CSV's header is its first answer's
   kind, so a CSV of two kinds is refused (`lib.ErrMixedCSV`), before any
   request when the arguments alone mix them. A `--field` is checked against the kinds the
   arguments ask for (`answerKinds`): addresses always, as stdin may add them.
