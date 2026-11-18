@@ -58,7 +58,7 @@ describes and downloads the databases.
   `app-E.internetdata.io`, and an `api`-labeled host keeps the sibling shape.
   `cmd_signup_test.go` pins it.
 
-## Channel state (2026-11-17, v1.8.0)
+## Channel state (2026-11-18, v1.8.0)
 
 GitHub release (its notes are the version's CHANGELOG.md section), ghcr
 (public, anonymous pull, `1.8.0` and `latest`), apt and `go install` were each
@@ -70,11 +70,11 @@ README installs it with `signed-by`; a fresh bookworm installed 1.8.0 that way.
 Its index lists all 27 versions, 1.0.0 to 1.8.0. The tap's formula names 1.8.0
 with the release's own checksums. The tap's SECURITY.md and README are kept by
 hand: the release job stages only `Formula/`. Chocolatey approved every version
-through 1.7.0, each after a human's review; 1.8.0 is in moderation.
+through 1.8.0, each after a human's review.
 winget took its first version, 1.4.7 as `InternetData.CLI`, on 2026-11-03
 (microsoft/winget-pkgs#441588), and every later one is the release's `winget`
 job, which must go green; 1.5.0 merged, with its locale's `Description`
 rewritten on the PR's branch for the lookups, since the job copies the last
-version's forward; every version through 1.7.0 merged (#481578), and 1.8.0's is #482225.
+version's forward; every version through 1.8.0 merged (#482225).
 The job posts the CLA agree when a PR reads `Needs-CLA`, which none since
 1.4.12 has.
