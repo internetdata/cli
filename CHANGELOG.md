@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.8.2 - 2026-11-19
+
+### Fixes
+
+- Don't cache an answer reduced past the trial or the cap ([`307fada`](https://github.com/internetdata/cli/commit/307fadae751cf2b5fae15a9d4d2b7bd4fba6664d))
+
 ## 1.8.1 - 2026-11-19
 
 ### Fixes
