@@ -396,7 +396,7 @@ On a key with no paid plan, each answer carries `trial_expired`: `false` for the
 
 ## Caching
 
-Address answers are cached on disk, so looking the same address up twice costs one request rather than two. An AS or a domain is never cached.
+Address answers are cached on disk, so looking the same address up twice costs one request rather than two. An AS or a domain is never cached, and neither is an answer with `trial_expired` or `cap_reached` set to `true`, so once the trial resets or your cap is raised the next lookup gets every field.
 
 ```bash
 internetdata cache info
