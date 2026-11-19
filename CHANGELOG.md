@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.8.1 - 2026-11-19
+
+### Fixes
+
+- Drop the license hint from a database call's plain-HTTP 403 ([`1c970b0`](https://github.com/internetdata/cli/commit/1c970b049a455673ee17db5442f8cdd4c5caa0ce))
+
 ## 1.8.0 - 2026-11-17
 
 ### Features
