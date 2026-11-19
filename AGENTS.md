@@ -40,8 +40,10 @@ describes and downloads the databases.
 - **Keys are default-deny**: a key without the `db.download` scope looks
   addresses up and is refused by every database call, as a 401. So database
   errors go through `explainDatabase`, which names the scope, an address the
-  allowed addresses leave out and the license apart, and `checkKey` validates
-  a key at login with a lookup, never the listing first. Since 2026-11-13 a key
+  allowed addresses leave out and the license (`NOT_LICENSED`,
+  `LICENSE_EXPIRED`) apart, and leaves any other 403, as `KEY_OVER_HTTP`, to the
+  API's code; `checkKey` validates a key at login with a lookup, never the
+  listing first. Since 2026-11-13 a key
   its owner took `ip.lookup` from is refused every lookup as a 403 (not
   `whoami`: the API's source checks no scope on the account call, 2026-11-15),
   so login asks the listing after a 403 and stores a key that answers it, with a

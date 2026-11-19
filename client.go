@@ -258,8 +258,9 @@ func explain(err error) error {
 // explainDatabase is explain for a database call, whose refusals mean other
 // things. Keys are default-deny, so a valid key without the db.download scope is
 // refused as unauthorized, not as forbidden, and it still looks addresses up. A
-// forbidden is a license, or an address the allowed addresses leave out, and
-// only its code tells them apart.
+// forbidden is a license, an address the allowed addresses leave out, or a key
+// sent over plain HTTP, and only its code tells them apart. The last names its
+// own remedy.
 func explainDatabase(err error) error {
 	var apiErr *internetdata.Error
 	if !errors.As(err, &apiErr) {
@@ -270,12 +271,14 @@ func explainDatabase(err error) error {
 		return fmt.Errorf("%w\nthe API key was not accepted, or it lacks the db.download scope; check `%s whoami`",
 			err, progBase)
 	case internetdata.KindForbidden:
-		if apiErr.Message == "IP_NOT_ALLOWED" {
+		switch apiErr.Message {
+		case "IP_NOT_ALLOWED":
 			return fmt.Errorf("%w\nthe key is fine; its allowed addresses, or its organization's, leave this one out",
 				err)
+		case "NOT_LICENSED", "LICENSE_EXPIRED":
+			return fmt.Errorf("%w\nthis organization's license does not cover that; `%s db list` shows what it holds",
+				err, progBase)
 		}
-		return fmt.Errorf("%w\nthis organization's license does not cover that; `%s db list` shows what it holds",
-			err, progBase)
 	case internetdata.KindRateLimited:
 		return fmt.Errorf("%w\nslow down, and try again shortly", err)
 	}

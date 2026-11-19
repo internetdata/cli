@@ -37,6 +37,15 @@ func TestExplainDatabase(t *testing.T) {
 	}
 }
 
+// A database call over plain HTTP is a 403 too, and naming the license there
+// sent the caller to `db list`, which is refused the same way.
+func TestExplainDatabaseLeavesANonLicense403ToTheAPI(t *testing.T) {
+	err := &internetdata.Error{Kind: internetdata.KindForbidden, Message: "KEY_OVER_HTTP", StatusCode: 403}
+	if got := explainDatabase(err).Error(); got != err.Error() {
+		t.Errorf("explainDatabase(KEY_OVER_HTTP) = %q, want the SDK's error alone", got)
+	}
+}
+
 // A lookup's 403 refuses a valid key for how it was used, and the spec's three
 // reasons are the API's messages here. None is a plan or a license, so explain
 // adds nothing to them.
