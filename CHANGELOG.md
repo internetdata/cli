@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.8.4 - 2026-11-20
+
+### Fixes
+
+- whoami says what a paid key's lookups get past its hard limit ([`e090a05`](https://github.com/internetdata/cli/commit/e090a05338a8747d06e79ebe812d136b5804930c))
+
 ## 1.8.3 - 2026-11-20
 
 ### Fixes
