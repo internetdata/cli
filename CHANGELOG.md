@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.8.3 - 2026-11-20
+
+### Fixes
+
+- Help and README: the free trial without a count ([`a7dc155`](https://github.com/internetdata/cli/commit/a7dc15519611543876cf13b3f9442363a8459610))
+
 ## 1.8.2 - 2026-11-19
 
 ### Fixes
