@@ -312,9 +312,11 @@ fields       max tier
 
 used         412,908 of 5,000,000
              [###                                     ] 8.3%
-hard limit   none; requests above the quota are billed as overage
+hard limit   5,000,000
 resets       2026-10-04T07:00:00Z (in 20d)
 ```
+
+The hard limit is where full answers stop: past it, lookups answer with Unlimited's fields and `cap_reached: true`, unbilled, until usage resets or the limit is raised. Overage is off until your organization turns it on in Billing, so the limit starts at the quota. With overage on, lookups above the quota are billed as overage up to the limit, and `none` means there is no limit.
 
 Also spelled `entitlement`. Usage counts against the anniversary of your subscription, not the calendar month and not the billing period, and it is the same number a lookup is gated on.
 
