@@ -32,7 +32,7 @@ Description:
   anycast, a carrier or satellite network, or runs SSH, SMTP, a web server, a
   DNS resolver or BitTorrent, with no daily cap. Every paid plan answers every
   field and looks addresses up in batches, and a new account can try every
-  field, 100 lookups a day.
+  field.
 
 Examples:
   # One address, one AS, one domain.

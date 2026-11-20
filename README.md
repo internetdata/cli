@@ -9,7 +9,7 @@ Look up what every InternetData database says about an IP address - where it is,
 
 ## Getting Started
 
-No account is needed to start: Unlimited, the free plan, answers any address with no cap, with a key or without one: where it is, the AS and company behind it, its abuse contact, and whether it is a Tor exit, a relay, anycast, a carrier or satellite network, or runs SSH, SMTP, a web server, a DNS resolver or BitTorrent, one address per request. Every paid plan answers all our data fields and looks addresses up in batches of up to 1,000, and a free account tries every field, 100 lookups a day.
+No account is needed to start: Unlimited, the free plan, answers any address with no cap, with a key or without one: where it is, the AS and company behind it, its abuse contact, and whether it is a Tor exit, a relay, anycast, a carrier or satellite network, or runs SSH, SMTP, a web server, a DNS resolver or BitTorrent, one address per request. Every paid plan answers all our data fields and looks addresses up in batches of up to 1,000, and a free account tries every field.
 
 ### macOS
 
@@ -392,7 +392,7 @@ How much you get back per lookup depends on the plan behind your key. See the [p
 
 **A field your plan does not include is missing from the answer, not `false`.** `is_vpn` absent means it is not in your plan; `is_vpn: false` means we checked and it is not a VPN. The readable output prints only what you were served; CSV writes an empty cell for absent and the literal `false` for false. `--show-absent` renders the lot.
 
-On a key with no paid plan, each answer carries `trial_expired`: `false` for the day's 100 full lookups, `true` once they're spent and the answer is Unlimited's. `internetdata whoami` counts them. A paid key's answers carry `cap_reached` instead, `true` once your organization's overage cap is reached and the answer is Unlimited's, which isn't billed.
+On a key with no paid plan, each answer carries `trial_expired`: `false` while the free trial lasts, `true` once it's spent and the answer is Unlimited's. `internetdata whoami` shows how far into it you are. A paid key's answers carry `cap_reached` instead, `true` once your organization's overage cap is reached and the answer is Unlimited's, which isn't billed.
 
 ## Caching
 

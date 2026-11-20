@@ -64,7 +64,7 @@ Description:
   You do not need an account to use this tool: Unlimited, the free plan, with a
   key or without one, answers where an address is, its AS, company and abuse
   contact, and whether it is a Tor exit or a relay, with no cap. A free account
-  also tries every field, 100 lookups a day, and a paid plan answers them all.
+  also tries every field, and a paid plan answers them all.
 
 Options:
   --no-browser
