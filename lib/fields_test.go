@@ -98,8 +98,10 @@ const asnPaidAnswer = `{
   "cap_reached":false
 }`
 
-// domainPaidAnswer is a domain's answer on a paid plan: its records, its
-// organization's ranges, and an empty disposable object under a false flag.
+// domainPaidAnswer is a domain's answer on a paid plan: its records, the
+// network on each address, the domains sharing its first, its organization's
+// ranges, an empty disposable object under a false flag, its home page and the
+// domains redirecting or linking to it.
 const domainPaidAnswer = `{
   "domain":"example.com","is_registered":true,"is_disposable":false,"has_a":true,"has_aaaa":true,
   "has_mx":true,"has_ns":true,"has_cname":false,
@@ -107,9 +109,16 @@ const domainPaidAnswer = `{
     "aaaa":[{"ip":"2001:db8::10","last_seen":"2026-11-08"}],
     "mx":[{"priority":10,"host":"mail.example.com","last_seen":"2026-11-08"}],
     "ns":[{"host":"ns1.example.com","last_seen":"2026-11-08"}],"cname":[]},
+  "hosting":[{"ip":"192.0.2.10","asn":{"asn":64496,"name":"EXAMPLE-AS","domain":"example.net",
+    "type":"hosting","prefix":"192.0.2.0/24","country":"US","rpki_status":"valid"}}],
+  "cohosted_domains":{"ip":"192.0.2.10","total":3,"domains":["example.net","example.org","shop.example"]},
   "ip_ranges":{"domain":"example.com","redirects_to":"","total":1,"ipv4":256,
     "ranges":[{"range":"192.0.2.0/24","name":"EXAMPLE-NET","country":"US"}]},
   "disposable":{},
+  "web":{"url":"https://example.com/","title":"Example Domain","description":"","last_seen":"2026-11-18",
+    "links":{"total":1,"hosts":["www.iana.org"]}},
+  "redirects":{"total":2,"domains":["example.net","example.org"]},
+  "backlinks":{"total":3,"domains":["docs.example","news.example","wiki.example"]},
   "cap_reached":false
 }`
 
@@ -243,7 +252,8 @@ func TestPresentListsAnASAndADomainInTheirOwnOrder(t *testing.T) {
 	}
 	gotDomain := flattenJSON(t, domainPaidAnswer).Present(KindDomain)
 	records := DomainColumns[:slices.Index(DomainColumns, "disposable.confidence")]
-	wantDomain := append(append([]string{}, records...), "disposable", "cap_reached")
+	page := DomainColumns[slices.Index(DomainColumns, "web.url"):slices.Index(DomainColumns, "trial_expired")]
+	wantDomain := slices.Concat(records, []string{"disposable"}, page, []string{"cap_reached"})
 	if !reflect.DeepEqual(gotDomain, wantDomain) {
 		t.Errorf("domain: got %v\nwant %v", gotDomain, wantDomain)
 	}
@@ -329,6 +339,23 @@ func TestValidateAndExpandFields(t *testing.T) {
 	want = []string{"dns.a", "dns.aaaa", "dns.mx", "dns.ns", "dns.cname"}
 	if strings.Join(got, ",") != strings.Join(want, ",") {
 		t.Errorf("domain: got %v, want %v", got, want)
+	}
+	// An object inside an object is selected by its own name too.
+	if err := ValidateFields([]string{"web.links", "web.links.total", "cohosted_domains"}, KindDomain); err != nil {
+		t.Errorf("a domain's nested fields rejected: %v", err)
+	}
+	got = ExpandFields(KindDomain, []string{"web.links"})
+	want = []string{"web.links.total", "web.links.hosts"}
+	if strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Errorf("web.links: got %v, want %v", got, want)
+	}
+}
+
+// --show-absent lists a domain's fields in the answer's order, the hosting
+// list after the records rather than after the objects.
+func TestAllListsADomainInTheAnswersOrder(t *testing.T) {
+	if got := flattenJSON(t, `{"domain":"example.com"}`).All(KindDomain); !reflect.DeepEqual(got, DomainColumns) {
+		t.Errorf("got %v\nwant %v", got, DomainColumns)
 	}
 }
 

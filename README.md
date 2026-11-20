@@ -221,7 +221,7 @@ has_ns         true
 has_cname      false
 ```
 
-Every plan answers an AS's registration, and whether a domain is registered and which record types it has. A paid plan adds the AS's whois record, the prefixes it announces, its rank, upstreams, peers and downstreams and the domains it hosts, and the domain's records, its organization's IP ranges and `is_disposable`. Each is one request, never cached or batched, and is typed as an argument: a list, piped or in a file, is read for addresses. An AS or a domain beside addresses is answered after them.
+Every plan answers an AS's registration, and whether a domain is registered and which record types it has. A paid plan adds the AS's whois record, the prefixes it announces, its rank, upstreams, peers and downstreams and the domains it hosts, and the domain's records, the network on each of its addresses, the other domains on its first, its organization's IP ranges, `is_disposable`, its home page and the domains redirecting or linking to it. Each is one request, never cached or batched, and is typed as an argument: a list, piped or in a file, is read for addresses. An AS or a domain beside addresses is answered after them.
 
 ### Piping
 

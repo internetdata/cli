@@ -145,12 +145,20 @@ var ASNColumns = []string{
 
 // DomainColumns is every field a domain's answer can carry, in CSV's order,
 // under the same rule as Columns. Each record type is one column holding its
-// list, as are the ranges.
+// list, as are the ranges, the hosting and each list of domains or hosts. One
+// exception was chosen: 1.9.0 put hosting to backlinks.domains in the answer's
+// order, moving the ranges and the disposable detail four columns right and
+// trial_expired fourteen.
 var DomainColumns = []string{
 	"domain", "is_registered", "is_disposable", "has_a", "has_aaaa", "has_mx", "has_ns", "has_cname",
 	"dns.a", "dns.aaaa", "dns.mx", "dns.ns", "dns.cname",
+	"hosting",
+	"cohosted_domains.ip", "cohosted_domains.total", "cohosted_domains.domains",
 	"ip_ranges.domain", "ip_ranges.redirects_to", "ip_ranges.total", "ip_ranges.ipv4", "ip_ranges.ranges",
 	"disposable.confidence", "disposable.providers", "disposable.first_seen", "disposable.last_seen",
+	"web.url", "web.title", "web.description", "web.last_seen", "web.links.total", "web.links.hosts",
+	"redirects.total", "redirects.domains",
+	"backlinks.total", "backlinks.domains",
 	"trial_expired", "cap_reached",
 }
 
@@ -186,8 +194,10 @@ var schemas = map[Kind]schema{
 		lead: []string{
 			"domain", "is_registered", "is_disposable", "has_a", "has_aaaa", "has_mx", "has_ns", "has_cname",
 		},
-		objects: []string{"dns", "ip_ranges", "disposable"},
-		key:     "domain",
+		objects: []string{
+			"dns", "hosting", "cohosted_domains", "ip_ranges", "disposable", "web", "redirects", "backlinks",
+		},
+		key: "domain",
 	},
 }
 
@@ -343,7 +353,8 @@ func (r Record) listed(s schema, absent bool) []string {
 		emit(f)
 	}
 	for _, obj := range s.objects {
-		if r[obj].Present {
+		// A domain's hosting is a list in an object's place: one column.
+		if r[obj].Present || slices.Contains(s.columns, obj) {
 			emit(obj)
 			continue
 		}
@@ -382,9 +393,11 @@ func ValidateFields(fields []string, kinds ...Kind) error {
 	for _, kind := range kinds {
 		for _, col := range schemas[kind].columns {
 			known[col] = true
-			// A bare object name selects the whole object.
-			if i := strings.IndexByte(col, '.'); i > 0 {
-				known[col[:i]] = true
+			// An object's name selects the whole object, one inside another too.
+			for i, c := range col {
+				if c == '.' {
+					known[col[:i]] = true
+				}
 			}
 		}
 	}
@@ -406,7 +419,7 @@ func ExpandFields(kind Kind, fields []string) []string {
 	columns := schemas[kind].columns
 	out := make([]string, 0, len(fields))
 	for _, f := range fields {
-		if strings.ContainsRune(f, '.') {
+		if slices.Contains(columns, f) {
 			out = append(out, f)
 			continue
 		}
@@ -434,27 +447,30 @@ func ExpandFields(kind Kind, fields []string) []string {
 func selectFields(tree map[string]any, fields []string) map[string]any {
 	out := make(map[string]any, len(fields))
 	for _, f := range fields {
-		name, sub, nested := strings.Cut(f, ".")
-		v, ok := tree[name]
-		if !ok {
-			continue
-		}
-		if !nested {
-			out[name] = v
-			continue
-		}
-		obj, ok := v.(map[string]any)
-		if !ok {
-			continue
-		}
-		kept, ok := out[name].(map[string]any)
-		if !ok {
-			kept = map[string]any{}
-			out[name] = kept
-		}
-		if sv, ok := obj[sub]; ok {
-			kept[sub] = sv
-		}
+		keep(out, tree, f)
 	}
 	return out
+}
+
+// keep copies one dotted field of tree into out, nested as it is in tree.
+func keep(out, tree map[string]any, field string) {
+	name, sub, nested := strings.Cut(field, ".")
+	v, ok := tree[name]
+	if !ok {
+		return
+	}
+	if !nested {
+		out[name] = v
+		return
+	}
+	obj, ok := v.(map[string]any)
+	if !ok {
+		return
+	}
+	kept, ok := out[name].(map[string]any)
+	if !ok {
+		kept = map[string]any{}
+		out[name] = kept
+	}
+	keep(kept, obj, sub)
 }

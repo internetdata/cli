@@ -361,6 +361,12 @@ func TestFieldSelectsInAnASAndADomain(t *testing.T) {
 				`example.com,"[{""host"":""ns1.example.com"",""last_seen"":""2026-11-08""}]",,,,` + "\n"},
 		{KindDomain, "example.com", domainPaidAnswer, FormatPretty, []string{"is_registered", "disposable"},
 			"is_registered  true\ndisposable     {}\n"},
+		{KindDomain, "example.com", domainPaidAnswer, FormatJSONL, []string{"web.links.total", "redirects.total"},
+			`{"redirects":{"total":2},"web":{"links":{"total":1}}}` + "\n"},
+		{KindDomain, "example.com", domainPaidAnswer, FormatJSONL, []string{"web.links"},
+			`{"web":{"links":{"hosts":["www.iana.org"],"total":1}}}` + "\n"},
+		{KindDomain, "example.com", domainPaidAnswer, FormatCSV, []string{"cohosted_domains.total", "web.links"},
+			"cohosted_domains.total,web.links.total,web.links.hosts\n3,1,\"[\"\"www.iana.org\"\"]\"\n"},
 	}
 	for _, c := range cases {
 		got := renderOne(t, c.kind, c.key, c.format, Opts{Fields: c.fields}, c.body)
