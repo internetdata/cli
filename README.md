@@ -188,6 +188,8 @@ asn.name                  M247 Europe SRL
 asn.domain                m247global.com
 asn.type                  hosting
 asn.prefix                146.70.116.0/24
+asn.country               RO
+asn.rpki_status           not_found
 company.name              M247 LTD Vienna Infrastructure
 company.domain            m247.ro
 abuse.email               abuse@m247.ro
