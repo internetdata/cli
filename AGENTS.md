@@ -25,9 +25,14 @@ describes and downloads the databases.
   beside its total, and 1.7.0's ten AS fields, `rank` to
   `hosted_domains.domains`, after `prefixes`. 1.8.0 appended `cap_reached`
   after `trial_expired`, the spec's order, so the two plan-state flags end
-  every kind's columns (`TestPlanStateComesLast`); ask again for the next field
-  rather than place it by any of these. A CSV's header is its first answer's
-  kind, so a CSV of two kinds is refused (`lib.ErrMixedCSV`), before any
+  every kind's columns (`TestPlanStateComesLast`). 1.9.0 put a domain's five
+  new members in the answer's order, `hosting` and `cohosted_domains.*` after
+  the records and `web.*` to `backlinks.*` after `disposable.*`, moving the
+  ranges and the disposable detail four columns right, chosen over appending
+  them. Ask again for the next field rather than place it by any of these.
+  `web.links` is the first object inside an object: `--field` takes it, and
+  `keep` copies a selected field at any depth. A CSV's header is its first
+  answer's kind, so a CSV of two kinds is refused (`lib.ErrMixedCSV`), before any
   request when the arguments alone mix them. A `--field` is checked against the kinds the
   arguments ask for (`answerKinds`): addresses always, as stdin may add them.
   An AS's error line names it by its number, `{"asn":15169,...}`, and its JSON
@@ -60,24 +65,25 @@ describes and downloads the databases.
   `app-E.internetdata.io`, and an `api`-labeled host keeps the sibling shape.
   `cmd_signup_test.go` pins it.
 
-## Channel state (2026-11-20, v1.8.4)
+## Channel state (2026-11-20, v1.9.0)
 
 GitHub release (its notes are the version's CHANGELOG.md section), ghcr
-(public, anonymous pull, `1.8.4` and `latest`), apt and `go install` were each
-verified serving 1.8.4. The image carries OCI labels for the site, docs, source
+(public, anonymous pull, `1.9.0` and `latest`), apt and `go install` were each
+verified serving 1.9.0. The image carries OCI labels for the site, docs, source
 and license, and its index's description annotation is what GitHub's package
 page shows. apt is signed since 2026-11-10: `InRelease`, `Release.gpg` and
 `public.key` (fingerprint `590AB7732517F95B056ED35317EA110D248C1B73`), and the
-README installs it with `signed-by`; a fresh bookworm installed 1.8.4 that way.
-Its index lists all 31 versions, 1.0.0 to 1.8.4. The tap's formula names 1.8.4
+README installs it with `signed-by`; a fresh bookworm installed 1.9.0 that way.
+Its index lists all 32 versions, 1.0.0 to 1.9.0. The tap's formula names 1.9.0
 with the release's own checksums. The tap's SECURITY.md and README are kept by
 hand: the release job stages only `Formula/`. Chocolatey approved every version
-through 1.8.2, each after a human's review; 1.8.3 and 1.8.4 are in moderation.
+through 1.8.2, each after a human's review; 1.8.3, 1.8.4 and 1.9.0 are in
+moderation.
 winget took its first version, 1.4.7 as `InternetData.CLI`, on 2026-11-03
 (microsoft/winget-pkgs#441588), and every later one is the release's `winget`
 job, which must go green; 1.5.0 merged, with its locale's `Description`
 rewritten on the PR's branch for the lookups, since the job copies the last
-version's forward; every version through 1.8.2 merged (#484063), and the PRs
-for 1.8.3 (#484836) and 1.8.4 (#484847) are open.
+version's forward; every version through 1.8.2 merged (#484063), and 1.8.4
+(#484847); the PRs for 1.8.3 (#484836) and 1.9.0 (#484930) are open.
 The job posts the CLA agree when a PR reads `Needs-CLA`, which none since
 1.4.12 has.
