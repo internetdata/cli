@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.9.0 - 2026-11-20
+
+### Features
+
+- A paid domain's hosting, co-hosted domains, home page, redirects and backlinks ([`a851166`](https://github.com/internetdata/cli/commit/a851166df53fe1906d13814d3e5bb0f5e9168390))
+
 ## 1.8.4 - 2026-11-20
 
 ### Fixes
