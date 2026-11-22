@@ -5,11 +5,11 @@
 
 The official command line interface for the [InternetData](https://internetdata.io) API.
 
-Look up what every InternetData database says about an IP address - where it is, the AS and company behind it, its abuse contact, whether it is a VPN, a proxy, a Tor exit, a relay, or a hosting, CDN, carrier or satellite network, and what it runs - one address at a time or a few million, look up an AS or a domain, and download the databases.
+Look up what every InternetData database says about an IP address - where it is, the AS and company behind it, its abuse contact, whether it is a VPN, a proxy, a Tor exit, a relay, a bot, or a hosting, CDN, carrier or satellite network, and what it runs - one address at a time or a few million, look up an AS or a domain, and download the databases.
 
 ## Getting Started
 
-No account is needed to start: Unlimited, the free plan, answers any address with no cap, with a key or without one: where it is, the AS and company behind it, its abuse contact, and whether it is a Tor exit, a relay, anycast, a carrier or satellite network, or runs SSH, SMTP, a web server, a DNS resolver or BitTorrent, one address per request. Every paid plan answers all our data fields and looks addresses up in batches of up to 1,000, and a free account tries every field.
+No account is needed to start: Unlimited, the free plan, answers any address with no cap, with a key or without one: where it is, the AS and company behind it, its abuse contact, and whether it is a Tor exit, a relay, a bot, anycast, a carrier or satellite network, or runs SSH, SMTP, a web server, a DNS resolver or BitTorrent, one address per request. Every paid plan answers all our data fields and looks addresses up in batches of up to 1,000, and a free account tries every field.
 
 ### macOS
 
@@ -163,6 +163,7 @@ ip                        146.70.116.130
 is_bogon                  false
 is_tor                    false
 is_relay                  false
+is_bot                    false
 is_anycast                false
 is_carrier                false
 is_satellite              false
@@ -196,7 +197,7 @@ abuse.email               abuse@m247.ro
 hostname                  ""
 ```
 
-That is Unlimited's answer, without a key. A paid plan adds `is_vpn`, `is_hosting`, `is_cdn` and the four proxy flags, the provider and confidence behind each flag, what each service answered, the location down to the city, and the whois records.
+That is Unlimited's answer, without a key. A paid plan adds `is_vpn`, `is_hosting`, `is_cdn` and the four proxy flags, the provider and confidence behind each flag, whose bot uses the address, what each service answered, the location down to the city, and the whois records.
 
 Private, reserved and documentation addresses are answered locally without a request, so they cost nothing and work offline.
 

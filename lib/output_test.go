@@ -621,6 +621,43 @@ func TestFieldTakesEveryProxyField(t *testing.T) {
 	}
 }
 
+// botAnswer is the bot flag and object the API served a paid key for
+// 66.249.66.1 on 2026-11-22.
+const botAnswer = `{
+  "ip":"66.249.66.1","is_bogon":false,"is_cdn":false,"is_bot":true,"is_anycast":false,
+  "cdn":{},
+  "bot":{"provider":"google","provider_name":"Google","agents":["GoogleOther","Googlebot"],
+    "categories":["other","search_engine"],"verified":true,"identity":"verified","verified_by":"list",
+    "confidence":"high","first_seen":"2026-11-21","last_seen":"2026-11-22"},
+  "carrier":{}
+}`
+
+// The bot flag and its object print where the answer has them, after the CDN's
+// and before the carrier's, each field in the API's order and a list as its JSON.
+func TestPrettyPrintsTheBotAfterTheCDN(t *testing.T) {
+	want := `ip                 66.249.66.1
+is_bogon           false
+is_cdn             false
+is_bot             true
+is_anycast         false
+cdn                {}
+bot.provider       google
+bot.provider_name  Google
+bot.agents         ["GoogleOther","Googlebot"]
+bot.categories     ["other","search_engine"]
+bot.verified       true
+bot.identity       verified
+bot.verified_by    list
+bot.confidence     high
+bot.first_seen     2026-11-21
+bot.last_seen      2026-11-22
+carrier            {}
+`
+	if got := render(t, FormatPretty, Opts{}, botAnswer); got != want {
+		t.Errorf("got\n%s\nwant\n%s", got, want)
+	}
+}
+
 func TestParseFormat(t *testing.T) {
 	for in, want := range map[string]Format{
 		"": FormatPretty, "pretty": FormatPretty, "JSON": FormatJSON,

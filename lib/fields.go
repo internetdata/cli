@@ -31,9 +31,10 @@ const (
 // the CSV contract. A caller's column indexes must not move because the API
 // grew a field, and a new field appearing silently at the end is far easier to
 // absorb than one appearing in the middle. The readable block lists each one
-// with its object's other fields all the same. One exception was chosen: 1.6.0
-// put hosted_domains.domains right after hosted_domains.total, moving
-// trial_expired one column right.
+// with its object's other fields all the same. Two exceptions were chosen:
+// 1.6.0 put hosted_domains.domains right after hosted_domains.total, moving
+// trial_expired one column right, and 1.10.0 put is_bot after is_cdn and bot
+// after cdn, the answer's order, moving every column after is_cdn.
 var Columns = []string{
 	"ip",
 	"is_bogon",
@@ -47,6 +48,7 @@ var Columns = []string{
 	"is_pubproxy",
 	"is_hosting",
 	"is_cdn",
+	"is_bot",
 	"is_anycast",
 	"is_carrier",
 	"is_satellite",
@@ -69,6 +71,8 @@ var Columns = []string{
 	"pubproxy.last_seen", "pubproxy.last_usable",
 	"hosting.provider", "hosting.provider_name", "hosting.confidence", "hosting.last_seen",
 	"cdn.provider", "cdn.provider_name", "cdn.confidence", "cdn.last_seen",
+	"bot.provider", "bot.provider_name", "bot.agents", "bot.categories", "bot.verified", "bot.identity",
+	"bot.verified_by", "bot.confidence", "bot.first_seen", "bot.last_seen",
 	"carrier.name", "carrier.mcc", "carrier.mnc", "carrier.country", "carrier.confidence",
 	"satellite.provider", "satellite.provider_name", "satellite.orbit", "satellite.segment",
 	"satellite.country", "satellite.asn", "satellite.confidence",
@@ -107,7 +111,7 @@ var Columns = []string{
 // Flags are an address's top-level booleans, which is what a summary line shows.
 var Flags = []string{
 	"is_vpn", "is_tor", "is_relay", "is_resproxy", "is_dcproxy", "is_mobproxy", "is_pubproxy",
-	"is_hosting", "is_cdn", "is_anycast", "is_carrier", "is_satellite", "is_ssh", "is_smtp",
+	"is_hosting", "is_cdn", "is_bot", "is_anycast", "is_carrier", "is_satellite", "is_ssh", "is_smtp",
 	"is_web", "is_dns_resolver", "is_bittorrent",
 }
 
@@ -116,7 +120,7 @@ var Flags = []string{
 // contact, the registry records and the hosted domains, which every keyed
 // answer carries whole.
 var Objects = []string{
-	"vpn", "tor", "relay", "resproxy", "dcproxy", "mobproxy", "pubproxy", "hosting", "cdn",
+	"vpn", "tor", "relay", "resproxy", "dcproxy", "mobproxy", "pubproxy", "hosting", "cdn", "bot",
 	"carrier", "satellite", "ssh", "smtp", "dns_resolver", "bittorrent",
 	"location", "asn", "company", "abuse", "whois", "rwhois", "hosted_domains",
 }
@@ -124,7 +128,7 @@ var Objects = []string{
 // ASNColumns is every field an AS's answer can carry, in CSV's order, under the
 // same rule as Columns. The whois record is keyed as the API documents it, and
 // prefixes, upstreams, peers and downstreams are each one column holding the list.
-// The same exception was chosen: 1.7.0 put rank to hosted_domains.domains after
+// An exception of the same kind was chosen: 1.7.0 put rank to hosted_domains.domains after
 // prefixes, moving trial_expired ten columns right.
 var ASNColumns = []string{
 	"asn", "name", "country", "registry", "allocated", "domain",

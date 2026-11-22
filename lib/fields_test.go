@@ -13,8 +13,8 @@ import (
 // unlimitedAnswer is what a lookup without a key serves: the common set and
 // InternetData's own flags, and every paid field ABSENT rather than false.
 const unlimitedAnswer = `{
-  "ip":"146.70.116.130","is_bogon":false,"is_tor":false,"is_relay":false,"is_anycast":false,
-  "is_carrier":false,"is_satellite":false,"is_ssh":false,"is_smtp":false,"is_web":false,
+  "ip":"146.70.116.130","is_bogon":false,"is_tor":false,"is_relay":false,"is_bot":false,
+  "is_anycast":false,"is_carrier":false,"is_satellite":false,"is_ssh":false,"is_smtp":false,"is_web":false,
   "is_dns_resolver":false,"is_bittorrent":false,"tor":{},"relay":{},
   "location":{"continent":"EU","continent_name":"Europe","country":"AT","country_name":"Austria",
     "timezone":"Europe/Vienna","currency_code":"EUR","currency_name":"Euro","currency_symbol":"€",
@@ -31,12 +31,13 @@ const unlimitedAnswer = `{
 const paidAnswer = `{
   "ip":"146.70.116.130","is_bogon":false,"is_vpn":true,"is_tor":false,"is_relay":false,
   "is_resproxy":false,"is_dcproxy":false,"is_mobproxy":false,"is_pubproxy":false,"is_hosting":true,
-  "is_cdn":false,"is_anycast":false,"is_carrier":false,"is_satellite":false,"is_ssh":false,
+  "is_cdn":false,"is_bot":false,"is_anycast":false,"is_carrier":false,"is_satellite":false,"is_ssh":false,
   "is_smtp":false,"is_web":false,"is_dns_resolver":false,"is_bittorrent":false,
   "vpn":{"provider":"mullvad","provider_name":"Mullvad","confidence":"high","last_seen":"2026-11-13"},
   "tor":{},"relay":{},"resproxy":{},"dcproxy":{},"mobproxy":{},"pubproxy":{},
   "hosting":{"provider":"m247","provider_name":"M247","confidence":"high","last_seen":"2026-11-13"},
-  "cdn":{},"carrier":{},"satellite":{},"ssh":{},"smtp":{},"web":[],"dns_resolver":{},"bittorrent":{},
+  "cdn":{},"bot":{},"carrier":{},"satellite":{},"ssh":{},"smtp":{},"web":[],"dns_resolver":{},
+  "bittorrent":{},
   "location":{"continent":"EU","continent_name":"Europe","country":"AT","country_name":"Austria",
     "timezone":"Europe/Vienna","currency_code":"EUR","currency_name":"Euro","currency_symbol":"€",
     "flag_emoji":"🇦🇹","flag_unicode":"U+1F1E6 U+1F1F9","region":"Vienna","region_code":"AT-9",
@@ -204,7 +205,7 @@ func TestPresentOrder(t *testing.T) {
 func TestPresentListsLocationAndAsnAfterTheDetails(t *testing.T) {
 	got := flattenJSON(t, unlimitedAnswer).Present(KindAddress)
 	want := []string{
-		"ip", "is_bogon", "is_tor", "is_relay", "is_anycast", "is_carrier", "is_satellite",
+		"ip", "is_bogon", "is_tor", "is_relay", "is_bot", "is_anycast", "is_carrier", "is_satellite",
 		"is_ssh", "is_smtp", "is_web", "is_dns_resolver", "is_bittorrent", "tor", "relay",
 		"location.continent", "location.continent_name", "location.country", "location.country_name",
 		"location.timezone", "location.currency_code", "location.currency_name", "location.currency_symbol",
@@ -361,8 +362,11 @@ func TestAllListsADomainInTheAnswersOrder(t *testing.T) {
 
 // Each kind's columns name every field the SDK's answer can carry, and nothing
 // else, so neither CSV nor --field leaves one out. A field a new sdk-go brings
-// fails here, on the bump that brings it.
+// fails here, on the bump that brings it. An address's user_agent is the one
+// left out: the API answers it only to a lookup that sent a User-Agent, which
+// sdk-go's lookups do not, so no answer this CLI gets carries it.
 func TestColumnsAreTheSDKsFields(t *testing.T) {
+	unrequested := map[string]bool{"user_agent": true}
 	for _, c := range []struct {
 		kind    Kind
 		answer  any
@@ -378,6 +382,7 @@ func TestColumnsAreTheSDKsFields(t *testing.T) {
 			t.Fatal(err)
 		}
 		named := make(map[string]bool, len(c.columns))
+		carried := map[string]bool{}
 		for _, col := range c.columns {
 			named[col] = true
 			// An AS's whois record is a map in the SDK, keyed as the API
@@ -393,9 +398,18 @@ func TestColumnsAreTheSDKsFields(t *testing.T) {
 			if c.kind == KindASN && k == "whois" {
 				continue
 			}
+			if top, _, _ := strings.Cut(k, "."); c.kind == KindAddress && unrequested[top] {
+				carried[top] = true
+				continue
+			}
 			if !named[k] {
 				t.Errorf("%T: the SDK's answer carries %s, which its columns do not name: "+
 					"append it, so no CSV column moves", c.answer, k)
+			}
+		}
+		for f := range unrequested {
+			if c.kind == KindAddress && !carried[f] {
+				t.Errorf("%T no longer carries %s: drop it from the fields left out", c.answer, f)
 			}
 		}
 	}
