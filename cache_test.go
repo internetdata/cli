@@ -145,7 +145,7 @@ func TestCacheForgetsAnExpiredAnswer(t *testing.T) {
 	}
 }
 
-// An answer cut to Unlimited's fields past the day's trial or the overage cap is
+// An answer cut to Unlimited's fields past the free trial or the overage cap is
 // not cached, so the lookup after the trial resets or the cap is raised asks
 // again and gets every field.
 func TestCacheSkipsAnAnswerReducedByTheTrialOrTheCap(t *testing.T) {

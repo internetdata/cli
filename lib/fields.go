@@ -96,7 +96,7 @@ var Columns = []string{
 	"rwhois.id", "rwhois.name", "rwhois.country", "rwhois.source", "rwhois.domain", "rwhois.abuse_email",
 	"hosted_domains.total", "hosted_domains.domains",
 
-	// On a free-plan key's answers alone: false for its daily trial's lookups with
+	// On a free-plan key's answers alone: false for its trial's lookups with
 	// every field, true once they are spent and the answer is Unlimited's.
 	"trial_expired",
 	// On a paid key's answers alone: false while the answer has every field, true
