@@ -2,6 +2,13 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.9.1 - 2026-11-22
+
+### Fixes
+
+- whoami names no period for the free plan's trial ([`45d2a55`](https://github.com/internetdata/cli/commit/45d2a5521e9d93aa5274ee2106e784da5f3e99b0))
+- --csv prints each unanswered lookup's error to standard error ([`723f13b`](https://github.com/internetdata/cli/commit/723f13b157ec956fe354eedb52178abf9106d93f))
+
 ## 1.9.0 - 2026-11-20
 
 ### Features
