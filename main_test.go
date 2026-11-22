@@ -102,16 +102,23 @@ func TestBareGroupPrintsHelp(t *testing.T) {
 // it printed.
 func captureStdout(t *testing.T, fn func() error) (string, error) {
 	t.Helper()
-	file, err := os.CreateTemp(t.TempDir(), "stdout")
+	return captureFile(t, &os.Stdout, fn)
+}
+
+// captureFile runs fn with *std, os.Stdout or os.Stderr, pointed at a file, and returns what fn
+// printed there, with fn's error.
+func captureFile(t *testing.T, std **os.File, fn func() error) (string, error) {
+	t.Helper()
+	file, err := os.CreateTemp(t.TempDir(), "std")
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = file.Close() })
 
-	saved := os.Stdout
-	os.Stdout = file
+	saved := *std
+	*std = file
 	fnErr := fn()
-	os.Stdout = saved
+	*std = saved
 	printed, err := os.ReadFile(file.Name())
 	if err != nil {
 		t.Fatal(err)

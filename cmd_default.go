@@ -25,7 +25,7 @@ Description:
   prints a readable block; more than one prints JSON.
 
   Anything that could not be answered gets its error in the output, in place
-  of an answer, and the command then exits 1.
+  of an answer (on standard error with --csv), and the command then exits 1.
 
   It works with no account at all: a lookup answers where the address is, its
   AS, company and abuse contact, and whether it is a Tor exit, a relay,

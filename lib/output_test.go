@@ -226,6 +226,35 @@ func TestJSONCarriesPerAddressErrors(t *testing.T) {
 	}
 }
 
+// CSV has no column for a failure, so it goes to Errors, beside a row holding the key alone: an
+// empty cell says the plan leaves a field out, never that the lookup failed.
+func TestCSVSendsEachFailureToErrors(t *testing.T) {
+	for _, c := range []struct {
+		kind    Kind
+		key     string
+		fields  []string
+		row     string
+		written string
+	}{
+		{KindAddress, "9.9.9.9", []string{"ip", "is_vpn"}, "ip,is_vpn\n9.9.9.9,\n", "err: 9.9.9.9: "},
+		{KindASN, "AS15169", []string{"asn", "name"}, "asn,name\n15169,\n", "err: AS15169: "},
+		{KindDomain, "example.com", []string{"domain", "is_registered"}, "domain,is_registered\nexample.com,\n",
+			"err: example.com: "},
+	} {
+		var out, errs strings.Builder
+		w := NewWriter(&out, FormatCSV, Opts{Fields: c.fields, Errors: &errs})
+		if err := w.WriteError(c.kind, c.key, errors.New("rate limit exceeded")); err != nil {
+			t.Fatal(err)
+		}
+		if err := w.Close(); err != nil {
+			t.Fatal(err)
+		}
+		if out.String() != c.row || errs.String() != c.written+"rate limit exceeded\n" {
+			t.Errorf("%s: wrote %q, and %q to Errors", c.key, out.String(), errs.String())
+		}
+	}
+}
+
 func TestJSONLIsOnePerLine(t *testing.T) {
 	got := strings.TrimSpace(render(t, FormatJSONL, Opts{}, unlimitedAnswer, paidAnswer))
 	lines := strings.Split(got, "\n")

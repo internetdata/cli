@@ -54,6 +54,9 @@ type Opts struct {
 	ShowAbsent bool
 	// Color enables ANSI color in the pretty format.
 	Color bool
+	// Errors receives each failure where the format has no place for it: CSV, whose columns hold
+	// none. Nil drops it.
+	Errors io.Writer
 }
 
 // Writer streams answers in one format.
@@ -276,14 +279,15 @@ func (c *csvWriter) WriteError(kind Kind, key string, err error) error {
 	cols := c.columns()
 	row := make([]string, len(cols))
 	for i, col := range cols {
-		switch col {
-		case schemas[kind].key:
+		if col == schemas[kind].key {
 			row[i] = fmt.Sprint(keyValue(kind, key))
-		case "error":
-			row[i] = err.Error()
 		}
 	}
-	return c.w.Write(row)
+	if wErr := c.w.Write(row); wErr != nil || c.opts.Errors == nil {
+		return wErr
+	}
+	_, wErr := fmt.Fprintf(c.opts.Errors, "err: %s: %v\n", key, err)
+	return wErr
 }
 
 func (c *csvWriter) writeHeader() error {

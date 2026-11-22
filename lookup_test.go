@@ -203,6 +203,39 @@ func TestLookupReportsAnUnansweredAddress(t *testing.T) {
 	}
 }
 
+// With --csv a refused lookup's error goes to standard error, since the row has no column for it,
+// and the row holds its address alone.
+func TestCSVReportsAnUnansweredAddressOnStandardError(t *testing.T) {
+	api := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = fmt.Fprint(w, `{"error": "invalid API key"}`)
+	}))
+	t.Cleanup(api.Close)
+	useAPI(t, api.URL, "test-key")
+
+	var out string
+	reported, err := captureFile(t, &os.Stderr, func() error {
+		var lookupErr error
+		out, lookupErr = captureStdout(t, func() error {
+			return runLookup(t.Context(), []string{"1.1.1.1", "2.2.2.2"},
+				lookupOpts{format: lib.FormatCSV, fields: []string{"ip", "is_vpn"}})
+		})
+		return lookupErr
+	})
+	if err != errUnanswered {
+		t.Errorf("runLookup = %v, want errUnanswered", err)
+	}
+	if want := "ip,is_vpn\n1.1.1.1,\n2.2.2.2,\n"; out != want {
+		t.Errorf("wrote\n%s\nwant\n%s", out, want)
+	}
+	for _, ip := range []string{"1.1.1.1", "2.2.2.2"} {
+		if want := "err: " + ip + ": internetdata: unauthorized (HTTP 401)"; !strings.Contains(reported, want) {
+			t.Errorf("standard error lacks %q:\n%s", want, reported)
+		}
+	}
+}
+
 // A list file that starts with a byte order mark, as Excel's "CSV UTF-8" export
 // writes one, loses none of its addresses: the first is not the mark glued to it.
 func TestLookupReadsAListAfterAByteOrderMark(t *testing.T) {

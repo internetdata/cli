@@ -77,7 +77,7 @@ func main() {
 	}
 
 	if err == errUnanswered {
-		// Each unanswered lookup carries its error in the output already.
+		// Each unanswered lookup has had its error printed already.
 		os.Exit(1)
 	}
 	if err != nil {
