@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.10.0 - 2026-11-22
+
+### Breaking changes
+
+- Show is_bot and a paid answer's bot, moving CSV's columns after is_cdn ([`39ad576`](https://github.com/internetdata/cli/commit/39ad57609b2f0fbecad5937e014793782ca17612))
+
 ## 1.9.1 - 2026-11-22
 
 ### Fixes
