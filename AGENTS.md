@@ -36,7 +36,8 @@ describes and downloads the databases.
   request when the arguments alone mix them. A `--field` is checked against the kinds the
   arguments ask for (`answerKinds`): addresses always, as stdin may add them.
   An AS's error line names it by its number, `{"asn":15169,...}`, and its JSON
-  key is `AS<n>` however it was typed.
+  key, and `--csv`'s `err: AS<n>: ...` on standard error, `AS<n>` however it
+  was typed.
 - **The AS whois record is a map in the SDK**, so its 39 columns come from the
   record the spec's paid example documents, and
   `TestASNWhoisColumnsAreTheDocumentedKeys` holds them to that answer's keys,
@@ -65,24 +66,24 @@ describes and downloads the databases.
   `app-E.internetdata.io`, and an `api`-labeled host keeps the sibling shape.
   `cmd_signup_test.go` pins it.
 
-## Channel state (2026-11-21, v1.9.0)
+## Channel state (2026-11-22, v1.9.1)
 
 GitHub release (its notes are the version's CHANGELOG.md section), ghcr
-(public, anonymous pull, `1.9.0` and `latest`), apt and `go install` were each
-verified serving 1.9.0. The image carries OCI labels for the site, docs, source
+(public, anonymous pull, `1.9.1` and `latest`), apt and `go install` were each
+verified serving 1.9.1. The image carries OCI labels for the site, docs, source
 and license, and its index's description annotation is what GitHub's package
 page shows. apt is signed since 2026-11-10: `InRelease`, `Release.gpg` and
 `public.key` (fingerprint `590AB7732517F95B056ED35317EA110D248C1B73`), and the
-README installs it with `signed-by`; a fresh bookworm installed 1.9.0 that way.
-Its index lists all 32 versions, 1.0.0 to 1.9.0. The tap's formula names 1.9.0
+README installs it with `signed-by`; a fresh bookworm installed 1.9.1 that way.
+Its index lists all 33 versions, 1.0.0 to 1.9.1. The tap's formula names 1.9.1
 with the release's own checksums. The tap's SECURITY.md and README are kept by
 hand: the release job stages only `Formula/`. Chocolatey approved every version
-through 1.9.0, each after a human's review.
+through 1.9.0, each after a human's review; 1.9.1 is in moderation.
 winget took its first version, 1.4.7 as `InternetData.CLI`, on 2026-11-03
 (microsoft/winget-pkgs#441588), and every later one is the release's `winget`
 job, which must go green. The job copies the last version's locale
 `Description` forward, so 1.5.0's was rewritten on its PR's branch for the
 lookups. Every version through 1.9.0 (#484930) merged but 1.8.3, whose #484836
 the validator holds as `Validation-Installation-Error` though its hashes match
-the release's zips. The job posts the CLA agree when a PR reads `Needs-CLA`,
-which none since 1.4.12 has.
+the release's zips; 1.9.1 is #486322. The job posts the CLA agree when a PR
+reads `Needs-CLA`, which none since 1.4.12 has.
