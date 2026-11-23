@@ -67,7 +67,7 @@ describes and downloads the databases.
   `app-E.internetdata.io`, and an `api`-labeled host keeps the sibling shape.
   `cmd_signup_test.go` pins it.
 
-## Channel state (2026-11-22, v1.10.0)
+## Channel state (2026-11-23, v1.10.0)
 
 GitHub release (its notes are the version's CHANGELOG.md section), ghcr
 (public, anonymous pull, `1.10.0` and `latest`), apt and `go install` were each
@@ -79,12 +79,12 @@ README installs it with `signed-by`; a fresh bookworm installed 1.10.0 that way.
 Its index lists all 34 versions, 1.0.0 to 1.10.0. The tap's formula names 1.10.0
 with the release's own checksums. The tap's SECURITY.md and README are kept by
 hand: the release job stages only `Formula/`. Chocolatey approved every version
-through 1.9.0, each after a human's review; 1.9.1 and 1.10.0 are in moderation.
+through 1.10.0, each after a human's review.
 winget took its first version, 1.4.7 as `InternetData.CLI`, on 2026-11-03
 (microsoft/winget-pkgs#441588), and every later one is the release's `winget`
 job, which must go green. The job copies the last version's locale
 `Description` forward, so 1.5.0's was rewritten on its PR's branch for the
-lookups. Every version through 1.9.0 (#484930) merged but 1.8.3, whose held
+lookups. Every version through 1.9.1 (#486322) merged but 1.8.3, whose held
 #484836 was closed as superseded: a PR still open for a version older than one
-that merged is closed at once. 1.9.1 is #486322, 1.10.0 #486393. The job posts
-the CLA agree when a PR reads `Needs-CLA`, which none since 1.4.12 has.
+that merged is closed at once. 1.10.0 is #486393. The job posts the CLA agree
+when a PR reads `Needs-CLA`, which none since 1.4.12 has.
