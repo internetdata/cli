@@ -79,7 +79,7 @@ README installs it with `signed-by`; a fresh bookworm installed 1.10.0 that way.
 Its index lists all 34 versions, 1.0.0 to 1.10.0. The tap's formula names 1.10.0
 with the release's own checksums. The tap's SECURITY.md and README are kept by
 hand: the release job stages only `Formula/`. Chocolatey approved every version
-through 1.10.0, each after a human's review.
+through 1.10.0, with no human since 1.3.0, as a trusted package.
 winget took its first version, 1.4.7 as `InternetData.CLI`, on 2026-11-03
 (microsoft/winget-pkgs#441588), and every later one is the release's `winget`
 job, which must go green. The job copies the last version's locale
