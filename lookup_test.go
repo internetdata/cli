@@ -662,7 +662,8 @@ func answerFor(ip string) map[string]any {
 
 // answerJSON is answerFor as the API serves it, and as the CLI writes it back.
 func answerJSON(ip string) string {
-	return `{"abuse":{"email":""},"asn":{"asn":0,"domain":"","name":"","prefix":"","type":""},` +
+	return `{"abuse":{"email":""},` +
+		`"asn":{"asn":0,"country":"","domain":"","name":"","prefix":"","rpki_status":"","type":""},` +
 		`"company":{"domain":"","name":""},"hostname":"","ip":"` + ip + `","is_anycast":false,` +
 		`"is_bittorrent":false,"is_bogon":false,"is_bot":false,"is_carrier":false,"is_dns_resolver":false,` +
 		`"is_relay":false,"is_satellite":false,"is_smtp":false,"is_ssh":false,"is_tor":false,"is_web":false,` +
