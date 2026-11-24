@@ -442,7 +442,7 @@ There are official InternetData client libraries available for many languages in
 
 Geolocation, anonymity, ownership and network databases for IP addresses and AS numbers, licensed as files you download and query yourself.
 
-[<img src="https://s3.internetdata.io/internetdata-public/brand/mark.svg" alt="InternetData" height="64"/>](https://internetdata.io/)
+[<picture><source media="(prefers-color-scheme: dark)" srcset="https://s3.internetdata.io/internetdata-public/brand/logo-dark.svg"><img src="https://s3.internetdata.io/internetdata-public/brand/logo.svg" alt="InternetData" height="40"/></picture>](https://internetdata.io/)
 
 ## License
 
