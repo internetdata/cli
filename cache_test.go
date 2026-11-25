@@ -146,8 +146,8 @@ func TestCacheForgetsAnExpiredAnswer(t *testing.T) {
 }
 
 // An answer cut to Unlimited's fields past the free trial or the overage cap is
-// not cached, so the lookup after the trial resets or the cap is raised asks
-// again and gets every field.
+// not cached, so the lookup after a subscription or a raised cap asks again and
+// gets every field.
 func TestCacheSkipsAnAnswerReducedByTheTrialOrTheCap(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	yes, no := true, false
