@@ -2,6 +2,13 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.10.1 - 2026-11-25
+
+### Fixes
+
+- whoami: a free key's trial ends once, never resets ([`c23af8f`](https://github.com/internetdata/cli/commit/c23af8f59e6531eb2cf538fd863dbd8195754ae3))
+- Help and README: a paid plan answers every field, not every paid plan ([`f2a9d6b`](https://github.com/internetdata/cli/commit/f2a9d6b72520bbe98534efd42faa935b5e3d3433))
+
 ## 1.10.0 - 2026-11-22
 
 ### Breaking changes
