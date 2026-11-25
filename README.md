@@ -9,7 +9,7 @@ Look up what every InternetData database says about an IP address - where it is,
 
 ## Getting Started
 
-No account is needed to start: Unlimited, the free plan, answers any address with no cap, with a key or without one: where it is, the AS and company behind it, its abuse contact, and whether it is a Tor exit, a relay, a bot, anycast, a carrier or satellite network, or runs SSH, SMTP, a web server, a DNS resolver or BitTorrent, one address per request. Every paid plan answers all our data fields and looks addresses up in batches of up to 1,000, and a free account tries every field.
+No account is needed to start: Unlimited, the free plan, answers any address with no cap, with a key or without one: where it is, the AS and company behind it, its abuse contact, and whether it is a Tor exit, a relay, a bot, anycast, a carrier or satellite network, or runs SSH, SMTP, a web server, a DNS resolver or BitTorrent, one address per request. A paid plan answers all our data fields and looks addresses up in batches of up to 1,000, and a free account tries every field.
 
 ### macOS
 

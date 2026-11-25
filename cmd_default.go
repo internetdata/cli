@@ -30,9 +30,8 @@ Description:
   It works with no account at all: a lookup answers where the address is, its
   AS, company and abuse contact, and whether it is a Tor exit, a relay,
   anycast, a carrier or satellite network, or runs SSH, SMTP, a web server, a
-  DNS resolver or BitTorrent, with no daily cap. Every paid plan answers every
-  field and looks addresses up in batches, and a new account can try every
-  field.
+  DNS resolver or BitTorrent, with no daily cap. A paid plan answers every field
+  and looks addresses up in batches, and a new account can try every field.
 
 Examples:
   # One address, one AS, one domain.
