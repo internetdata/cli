@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.11.0 - 2026-11-25
+
+### Breaking changes
+
+- --user-agent checks a visitor's agent, moving CSV's plan-state flags ([`f11b646`](https://github.com/internetdata/cli/commit/f11b6464041b9865388129e3bf992ebaa895313c))
+
 ## 1.10.1 - 2026-11-25
 
 ### Fixes
