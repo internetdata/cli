@@ -271,6 +271,20 @@ Bulk runs stream: nothing is held in memory beyond one batch, so a `/8` is a lon
 
 Output formats are `--pretty`, `--json`, `--jsonl`, `--csv` and `--yaml`. A CSV holds one kind of answer, so look addresses, AS numbers and domains up in separate runs for it.
 
+### Crawler verification
+
+`--user-agent` sends a visitor's User-Agent with every address, and on a paid plan or the trial each answer's `user_agent` names the agent, its kind, and whether this address bears it out: `verified`, `spoofed`, `unverifiable` or `not_bot`. So a request claiming to be Googlebot can be checked against the address it came from:
+
+```console
+$ internetdata bulk 66.249.66.1 146.70.116.130 -f ip,user_agent --csv \
+    --user-agent 'Googlebot/2.1 (+http://www.google.com/bot.html)'
+ip,user_agent.agent,user_agent.kind,user_agent.verdict
+66.249.66.1,Googlebot,bot,verified
+146.70.116.130,Googlebot,bot,spoofed
+```
+
+One agent goes with every address in a run.
+
 ### Exit status
 
 A lookup exits 1 when anything could not be answered, and 0 when everything was. Whatever went wrong - a key the API refused, a spent allowance, the API out of reach - that address, AS or domain gets its error in the output, in place of its answer, and everything else is answered as usual. A script that can live with gaps adds `|| true` and finds them in the output:
@@ -400,6 +414,8 @@ How much you get back per lookup depends on the plan behind your key. See the [p
 
 On a key with no paid plan, each answer carries `trial_expired`: `false` while the free trial lasts, `true` once it's spent and the answer is Unlimited's. `internetdata whoami` shows how far into it you are. A paid key's answers carry `cap_reached` instead, `true` once your organization's overage cap is reached and the answer is Unlimited's, which isn't billed.
 
+A lookup sent with `--user-agent` gets `user_agent` on a paid plan or the trial: the agent it names, its kind and whether the address bears it out. Its three columns sit after `hosted_domains.domains`, so `trial_expired` and `cap_reached` stay last in an address's CSV. They're empty for a lookup sent without one.
+
 ## Caching
 
 Address answers are cached on disk, so looking the same address up twice costs one request rather than two. An AS or a domain is never cached, and neither is an answer with `trial_expired` or `cap_reached` set to `true`, so once you subscribe or your cap is raised the next lookup gets every field.
@@ -412,7 +428,7 @@ internetdata config list
 internetdata config cache=disable cache_ttl=24h
 ```
 
-Entries are partitioned by **credential**, because which fields an answer carries depends on the plan behind the key - one key's answers are never served to another's. Clearing empties every partition.
+Entries are partitioned by **credential**, because which fields an answer carries depends on the plan behind the key - one key's answers are never served to another's. An answer to a lookup sent with `--user-agent` is cached for that agent alone, since it carries that agent's verdict. Clearing empties every partition.
 
 ## Color Output
 

@@ -27,10 +27,10 @@ describes and downloads the databases.
   the two plan-state flags end every kind's columns (`TestPlanStateComesLast`);
   1.9.0 (a domain's five members) and 1.10.0 (`is_bot` after `is_cdn`, `bot.*`
   after `cdn.*`) took the answer's order, moving the columns after them. Ask
-  again for the next field rather than place it by any of these. An address's
-  `user_agent` has no column: the API answers it only to a lookup that sent a
-  User-Agent, which sdk-go's lookups do not, and `TestColumnsAreTheSDKsFields`
-  skips it until the SDK stops carrying it.
+  again for the next field rather than place it by any of these. 1.11.0 put an
+  address's `user_agent.*` before `trial_expired`, moving the flags three right
+  (Uman's choice over appending; the answer only to `--user-agent`, sent with
+  every address of a run and keying its cache entry: `entryKey`).
   `web.links` is the first object inside an object: `--field` takes it, and
   `keep` copies a selected field at any depth. A CSV's header is its first
   answer's kind, so a CSV of two kinds is refused (`lib.ErrMixedCSV`), before any

@@ -34,7 +34,9 @@ const (
 // with its object's other fields all the same. Two exceptions were chosen:
 // 1.6.0 put hosted_domains.domains right after hosted_domains.total, moving
 // trial_expired one column right, and 1.10.0 put is_bot after is_cdn and bot
-// after cdn, the answer's order, moving every column after is_cdn.
+// after cdn, the answer's order, moving every column after is_cdn. 1.11.0 put
+// user_agent after hosted_domains, so the plan-state flags stay last, moving
+// them three columns right.
 var Columns = []string{
 	"ip",
 	"is_bogon",
@@ -100,6 +102,10 @@ var Columns = []string{
 	"rwhois.id", "rwhois.name", "rwhois.country", "rwhois.source", "rwhois.domain", "rwhois.abuse_email",
 	"hosted_domains.total", "hosted_domains.domains",
 
+	// Only to a lookup that sent a visitor's agent, on a paid plan or the trial,
+	// from 1.11.0: the agent it names, its kind, and whether the address bears it out.
+	"user_agent.agent", "user_agent.kind", "user_agent.verdict",
+
 	// On a free-plan key's answers alone: false for its trial's lookups with
 	// every field, true once they are spent and the answer is Unlimited's.
 	"trial_expired",
@@ -118,11 +124,11 @@ var Flags = []string{
 // Objects are an address's objects, in the order output presents them: each
 // flag's detail object, then the location, the AS, the company, the abuse
 // contact, the registry records and the hosted domains, which every keyed
-// answer carries whole.
+// answer carries whole, and the visitor's agent.
 var Objects = []string{
 	"vpn", "tor", "relay", "resproxy", "dcproxy", "mobproxy", "pubproxy", "hosting", "cdn", "bot",
 	"carrier", "satellite", "ssh", "smtp", "dns_resolver", "bittorrent",
-	"location", "asn", "company", "abuse", "whois", "rwhois", "hosted_domains",
+	"location", "asn", "company", "abuse", "whois", "rwhois", "hosted_domains", "user_agent",
 }
 
 // ASNColumns is every field an AS's answer can carry, in CSV's order, under the
@@ -314,13 +320,15 @@ func (r Record) Get(field string) Cell { return r[field] }
 // its fields, because that is what it is - `"vpn": {}` says the flag above it is
 // false, and expanding it into four blank rows would say something else.
 func (r Record) Present(kind Kind) []string {
-	return r.listed(schemas[kind], false)
+	return r.listed(schemas[kind], false, false)
 }
 
 // All lists what Present does and, each in its place among them, the fields
-// this answer does not carry, which is what --show-absent prints.
-func (r Record) All(kind Kind) []string {
-	return r.listed(schemas[kind], true)
+// this answer does not carry, which is what --show-absent prints. An address's
+// user_agent is among them only when the lookup sent an agent: without one, no
+// plan answers it, and listing it would say the plan left it out.
+func (r Record) All(kind Kind, agentSent bool) []string {
+	return r.listed(schemas[kind], true, agentSent)
 }
 
 // Selected lists what a --field selection names, an object as its fields,
@@ -343,11 +351,17 @@ func (r Record) Selected(kind Kind, fields []string) []string {
 	return out
 }
 
-func (r Record) listed(s schema, absent bool) []string {
+func (r Record) listed(s schema, absent, agentSent bool) []string {
 	out := make([]string, 0, len(s.columns))
 	seen := make(map[string]bool, len(s.columns))
+	listable := func(k string) bool {
+		if r[k].Present {
+			return true
+		}
+		return absent && (agentSent || !strings.HasPrefix(k, "user_agent."))
+	}
 	emit := func(k string) {
-		if (absent || r[k].Present) && !seen[k] {
+		if listable(k) && !seen[k] {
 			out = append(out, k)
 			seen[k] = true
 		}

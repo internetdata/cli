@@ -135,8 +135,9 @@ func TestCSVHoldsOneKind(t *testing.T) {
 	}
 }
 
-// trial_expired and cap_reached came last, so no column moved, and the readable
-// block prints each after the answer's fields, where a user reads whether the
+// trial_expired and cap_reached came last, so no column moved, and an address's
+// user_agent went before them in 1.11.0, so they stay last. The readable block
+// prints each after the answer's fields, where a user reads whether the
 // answer is Unlimited's: a trial key's because the day's full lookups are spent,
 // a paid key's because its organization's overage cap is reached. An answer
 // carries at most one of the two, so prints at most one.
@@ -519,6 +520,28 @@ func TestPrettyShowAbsent(t *testing.T) {
 	got := render(t, FormatPretty, Opts{ShowAbsent: true}, unlimitedAnswer)
 	if !strings.Contains(got, "is_vpn") {
 		t.Errorf("--show-absent should render it:\n%s", got)
+	}
+}
+
+// The visitor's agent's verdict prints last among the objects, before hostname, and
+// --show-absent lists it as '-' only for a lookup that sent an agent: a keyless or
+// free answer to one is left without it, which no plan answers to a lookup without.
+func TestPrettyPrintsTheAgentsVerdict(t *testing.T) {
+	const spoofed = `{"ip":"146.70.116.130","is_bogon":false,"is_vpn":true,"hostname":"h.example.net",` +
+		`"user_agent":{"agent":"Googlebot","kind":"bot","verdict":"spoofed"}}`
+	got := render(t, FormatPretty, Opts{}, spoofed)
+	want := "user_agent.agent    Googlebot\nuser_agent.kind     bot\nuser_agent.verdict  spoofed\n" +
+		"hostname            h.example.net\n"
+	if !strings.HasSuffix(got, want) {
+		t.Errorf("got\n%s\nwant it to end\n%s", got, want)
+	}
+	got = render(t, FormatPretty, Opts{ShowAbsent: true}, unlimitedAnswer)
+	if strings.Contains(got, "user_agent") {
+		t.Errorf("--show-absent listed user_agent for a lookup that sent no agent:\n%s", got)
+	}
+	got = render(t, FormatPretty, Opts{ShowAbsent: true, AgentSent: true}, unlimitedAnswer)
+	if !strings.Contains(got, "\nuser_agent.verdict ") || !strings.Contains(got, " -\nweb ") {
+		t.Errorf("--show-absent left out the user_agent a lookup sending an agent was not answered:\n%s", got)
 	}
 }
 

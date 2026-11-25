@@ -35,6 +35,8 @@ type lookupOpts struct {
 	forceBulk  bool
 	fields     []string
 	showAbsent bool
+	// agent is a visitor's User-Agent, sent with every address, or "" for none.
+	agent string
 	// input controls where addresses are read from.
 	input iputil.Opts
 }
@@ -93,6 +95,7 @@ func runLookup(ctx context.Context, args []string, opts lookupOpts) error {
 		writer = lib.NewWriter(os.Stdout, format, lib.Opts{
 			Fields:     opts.fields,
 			ShowAbsent: opts.showAbsent,
+			AgentSent:  opts.agent != "",
 			Color:      !color.NoColor,
 			Errors:     os.Stderr,
 		})
@@ -106,7 +109,7 @@ func runLookup(ctx context.Context, args []string, opts lookupOpts) error {
 			openWriter(!flushed && len(chunk) == 1 && len(targets) == 0 && !opts.forceBulk)
 		}
 		flushed = true
-		answers, err := client.LookupBatch(ctx, chunk)
+		answers, err := client.LookupBatch(ctx, chunk, opts.agent)
 		if err != nil {
 			return explain(err)
 		}
@@ -306,6 +309,12 @@ func writeOne(ip string, result *internetdata.Result, opts lookupOpts) error {
 		return err
 	}
 	return w.Close()
+}
+
+// userAgentFlag registers --user-agent, which the lookups of addresses take and
+// myip does not.
+func userAgentFlag() *string {
+	return pflag.String("user-agent", "", "a visitor's User-Agent, checked against each address.")
 }
 
 // formatFlags registers the output options the lookup commands share, and

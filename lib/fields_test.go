@@ -229,7 +229,7 @@ func TestAllListsEveryColumn(t *testing.T) {
 		{KindASN, `{"asn":15169}`, ASNColumns},
 		{KindDomain, `{"domain":"example.com"}`, DomainColumns},
 	} {
-		got := flattenJSON(t, c.body).All(c.kind)
+		got := flattenJSON(t, c.body).All(c.kind, true)
 		if len(got) != len(c.columns) {
 			t.Errorf("%s: All lists %d fields, want every column (%d): %v", c.body, len(got), len(c.columns), got)
 		}
@@ -237,6 +237,19 @@ func TestAllListsEveryColumn(t *testing.T) {
 			if !slices.Contains(got, col) {
 				t.Errorf("%s: All leaves out %s", c.body, col)
 			}
+		}
+	}
+	// user_agent only for a lookup that sent an agent, since no plan answers it to one that did not.
+	got := flattenJSON(t, `{"ip":"1.1.1.1","is_bogon":false}`).All(KindAddress, false)
+	agentless := slices.DeleteFunc(slices.Clone(Columns), func(col string) bool {
+		return strings.HasPrefix(col, "user_agent.")
+	})
+	if len(got) != len(agentless) {
+		t.Errorf("no agent sent: All lists %d fields, want %d: %v", len(got), len(agentless), got)
+	}
+	for _, f := range got {
+		if strings.HasPrefix(f, "user_agent.") {
+			t.Fatalf("All lists %s for a lookup that sent no agent: %v", f, got)
 		}
 	}
 }
@@ -355,18 +368,16 @@ func TestValidateAndExpandFields(t *testing.T) {
 // --show-absent lists a domain's fields in the answer's order, the hosting
 // list after the records rather than after the objects.
 func TestAllListsADomainInTheAnswersOrder(t *testing.T) {
-	if got := flattenJSON(t, `{"domain":"example.com"}`).All(KindDomain); !reflect.DeepEqual(got, DomainColumns) {
+	got := flattenJSON(t, `{"domain":"example.com"}`).All(KindDomain, false)
+	if !reflect.DeepEqual(got, DomainColumns) {
 		t.Errorf("got %v\nwant %v", got, DomainColumns)
 	}
 }
 
 // Each kind's columns name every field the SDK's answer can carry, and nothing
 // else, so neither CSV nor --field leaves one out. A field a new sdk-go brings
-// fails here, on the bump that brings it. An address's user_agent is the one
-// left out: the API answers it only to a lookup that sent a User-Agent, which
-// sdk-go's lookups do not, so no answer this CLI gets carries it.
+// fails here, on the bump that brings it.
 func TestColumnsAreTheSDKsFields(t *testing.T) {
-	unrequested := map[string]bool{"user_agent": true}
 	for _, c := range []struct {
 		kind    Kind
 		answer  any
@@ -382,7 +393,6 @@ func TestColumnsAreTheSDKsFields(t *testing.T) {
 			t.Fatal(err)
 		}
 		named := make(map[string]bool, len(c.columns))
-		carried := map[string]bool{}
 		for _, col := range c.columns {
 			named[col] = true
 			// An AS's whois record is a map in the SDK, keyed as the API
@@ -398,18 +408,9 @@ func TestColumnsAreTheSDKsFields(t *testing.T) {
 			if c.kind == KindASN && k == "whois" {
 				continue
 			}
-			if top, _, _ := strings.Cut(k, "."); c.kind == KindAddress && unrequested[top] {
-				carried[top] = true
-				continue
-			}
 			if !named[k] {
 				t.Errorf("%T: the SDK's answer carries %s, which its columns do not name: "+
 					"append it, so no CSV column moves", c.answer, k)
-			}
-		}
-		for f := range unrequested {
-			if c.kind == KindAddress && !carried[f] {
-				t.Errorf("%T no longer carries %s: drop it from the fields left out", c.answer, f)
 			}
 		}
 	}

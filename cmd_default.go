@@ -47,6 +47,9 @@ Examples:
   # One field, for a script.
   $ %[1]s 146.70.116.130 -f location.country
 
+  # Whether a request claiming to be Googlebot came from Google.
+  $ %[1]s 66.249.66.1 --user-agent 'Googlebot/2.1 (+http://www.google.com/bot.html)'
+
 Commands:
   myip        look up the address you are coming from.
   bulk        look up many addresses, always in the machine format.
@@ -76,6 +79,11 @@ Options:
       in-flight requests during a bulk lookup.
     --retries <n>
       retries per request.
+    --user-agent <agent>
+      a visitor's User-Agent, sent with every address. On a paid plan or the
+      trial, each answer's user_agent then names the agent, its kind, and
+      whether this address bears it out: verified, spoofed, unverifiable or
+      not_bot.
     --version, -v, --vsn
       print the version.
     --help, -h
@@ -106,6 +114,7 @@ func cmdDefault() error {
 	var fVersion bool
 	globalFlags()
 	lookupFlags()
+	agent := userAgentFlag()
 	pflag.BoolVarP(&fVersion, "version", "v", false, "print the version.")
 	pflag.BoolVar(&fVersion, "vsn", false, "print the version.")
 	resolve := formatFlags()
@@ -123,6 +132,7 @@ func cmdDefault() error {
 	if err != nil {
 		return err
 	}
+	opts.agent = *agent
 
 	// No address named and nothing piped or redirected in is a request for
 	// help. Standard input is then a device: a terminal, not to be left waiting
