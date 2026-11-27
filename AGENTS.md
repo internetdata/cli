@@ -39,6 +39,14 @@ describes and downloads the databases.
   An AS's error line names it by its number, `{"asn":15169,...}`, and its JSON
   key, and `--csv`'s `err: AS<n>: ...` on standard error, `AS<n>` however it
   was typed.
+- **A member the answer left out can read `false` or `""` in sdk-go v2**:
+  `is_bot`, the seven service flags and `asn.type`, which Unlimited leaves out
+  since 2026-11-26, keep a plain bool and string until v3. The SDK's one public
+  reader of what the wire left out is `middleware.MissingMembers`, here on the
+  `heldMembers` condition, and it knows only on the Result it decoded, so
+  `Answer.Unserved` is recorded at fetch time, the cache entry keeps it as `u`,
+  and `lib.Served`'s JSON, which every format reads, leaves each out (1.11.1).
+  At v3, when they become pointers, all of it goes.
 - **The AS whois record is a map in the SDK**, so its 39 columns come from the
   record the spec's paid example documents, and
   `TestASNWhoisColumnsAreTheDocumentedKeys` holds them to that answer's keys,

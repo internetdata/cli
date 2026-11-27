@@ -162,6 +162,33 @@ func TestAbsentIsNotFalse(t *testing.T) {
 
 // An empty detail object is PRESENT and means its flag is false, which is not
 // the answer a plan without that object gives.
+// Served leaves out each member the answer did not carry although its Go type
+// holds a value, at any depth, and keeps every other member.
+func TestServedLeavesOutWhatTheAnswerLeftOut(t *testing.T) {
+	answer := &internetdata.Result{LookupResponse: internetdata.LookupResponse{IP: "9.1.0.1"}}
+	rec, err := Flatten(Served{Answer: answer, Unserved: []string{"is_bot", "asn.type"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, field := range []string{"is_bot", "asn.type"} {
+		if rec[field].Present {
+			t.Errorf("%s is present, which the answer left out", field)
+		}
+	}
+	for _, field := range []string{"ip", "is_carrier", "is_tor", "asn.asn"} {
+		if !rec[field].Present {
+			t.Errorf("%s is absent, which the answer carried", field)
+		}
+	}
+	whole, err := Flatten(Served{Answer: answer})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := whole["is_bot"]; !got.Present || got.Text != "false" {
+		t.Errorf("is_bot of an answer that served it reads %+v, want false", got)
+	}
+}
+
 func TestEmptyObjectIsPresentNotAbsent(t *testing.T) {
 	paid := flattenJSON(t, paidAnswer)
 	if c := paid.Get("resproxy"); !c.Present || c.Text != "" {

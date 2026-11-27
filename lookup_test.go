@@ -745,14 +745,63 @@ func answerFor(ip string) map[string]any {
 	return answer
 }
 
-// answerJSON is answerFor as the API serves it, and as the CLI writes it back.
+// answerJSON is answerFor as the API serves it, and as the CLI writes it back:
+// since 2026-11-26 without is_bot, the seven service flags and the AS's type.
 func answerJSON(ip string) string {
 	return `{"abuse":{"email":""},` +
-		`"asn":{"asn":0,"country":"","domain":"","name":"","prefix":"","rpki_status":"","type":""},` +
+		`"asn":{"asn":0,"country":"","domain":"","name":"","prefix":"","rpki_status":""},` +
 		`"company":{"domain":"","name":""},"hostname":"","ip":"` + ip + `","is_anycast":false,` +
-		`"is_bittorrent":false,"is_bogon":false,"is_bot":false,"is_carrier":false,"is_dns_resolver":false,` +
-		`"is_relay":false,"is_satellite":false,"is_smtp":false,"is_ssh":false,"is_tor":false,"is_web":false,` +
+		`"is_bogon":false,"is_relay":false,"is_tor":false,` +
 		`"location":{"continent":"","continent_name":"","country":"","country_name":"","currency_code":"",` +
 		`"currency_name":"","currency_symbol":"","flag_emoji":"","flag_unicode":"","timezone":""},` +
 		`"relay":{},"tor":{}}`
+}
+
+// Unlimited's answer leaves is_bot, the seven service flags and the AS's type out,
+// which sdk-go reads as false and "" until its next major: every lookup prints them
+// absent, the one served from the cache too, and a paid answer's false stays false.
+func TestAFlagTheAnswerLeftOutIsAbsentNotFalse(t *testing.T) {
+	paid := answerFor("9.1.0.2")
+	paid["is_bot"] = false
+	paid["is_vpn"] = false
+	var requests atomic.Int32
+	api := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		answer := answerFor(strings.TrimPrefix(r.URL.Path, "/"))
+		if r.URL.Path == "/9.1.0.2" {
+			answer = paid
+		}
+		_ = json.NewEncoder(w).Encode(answer)
+	}))
+	t.Cleanup(api.Close)
+	useAPI(t, api.URL, "")
+	gConfig.CacheEnabled = true
+
+	for _, run := range []string{"fetched", "cached"} {
+		out, err := captureStdout(t, func() error {
+			return runLookup(t.Context(), []string{"9.1.0.1", "9.1.0.2"}, lookupOpts{format: lib.FormatJSONL})
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		lines := strings.Split(strings.TrimSpace(out), "\n")
+		if len(lines) != 2 {
+			t.Fatalf("%s: wrote %d line(s), want 2:\n%s", run, len(lines), out)
+		}
+		for _, line := range lines {
+			paidLine := strings.Contains(line, `"9.1.0.2"`)
+			if got := strings.Contains(line, `"is_bot":false`); got != paidLine {
+				t.Errorf("%s: is_bot false printed is %v, want %v:\n%s", run, got, paidLine, line)
+			}
+			for _, member := range []string{`"is_carrier"`, `"is_bittorrent"`, `"type"`} {
+				if strings.Contains(line, member) {
+					t.Errorf("%s: %s printed, which the answer left out:\n%s", run, member, line)
+				}
+			}
+		}
+	}
+	if n := requests.Load(); n != 2 {
+		t.Errorf("sent %d request(s), want 2: the second run reads the cache", n)
+	}
 }

@@ -11,7 +11,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/pflag"
 
-	internetdata "github.com/internetdata/sdk-go/v2"
 	iputil "github.com/mslmio/libgo-iputil"
 
 	"github.com/internetdata/cli/lib"
@@ -125,7 +124,7 @@ func runLookup(ctx context.Context, args []string, opts lookupOpts) error {
 				}
 				continue
 			}
-			if err := writer.Write(lib.KindAddress, ip, answer.Result); err != nil {
+			if err := writer.Write(lib.KindAddress, ip, answer.Shown()); err != nil {
 				return err
 			}
 		}
@@ -292,7 +291,7 @@ var errNothingFound = errors.New("no addresses found in the input; expected an I
 var errUnanswered = errors.New("not every address was answered")
 
 // writeOne renders one address's answer in the chosen format.
-func writeOne(ip string, result *internetdata.Result, opts lookupOpts) error {
+func writeOne(ip string, answer Answer, opts lookupOpts) error {
 	format := opts.format
 	if format == "" {
 		format = lib.Format(gConfig.Format)
@@ -305,7 +304,7 @@ func writeOne(ip string, result *internetdata.Result, opts lookupOpts) error {
 		ShowAbsent: opts.showAbsent,
 		Color:      !color.NoColor,
 	})
-	if err := w.Write(lib.KindAddress, ip, result); err != nil {
+	if err := w.Write(lib.KindAddress, ip, answer.Shown()); err != nil {
 		return err
 	}
 	return w.Close()

@@ -3,6 +3,7 @@
 package lib
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"slices"
@@ -258,6 +259,72 @@ func asTree(v any) (map[string]any, error) {
 		return nil, err
 	}
 	return tree, nil
+}
+
+// Served is an answer with the members it left out although its Go type cannot
+// say so: sdk-go keeps is_bot, the seven service flags and asn.type a plain bool
+// and string until its next major, so on Unlimited they read false and "". Its
+// JSON, which every format reads an answer through, leaves each of Unserved's
+// dotted paths out, so they print as absent, as any field the plan does not
+// include does.
+type Served struct {
+	Answer   any
+	Unserved []string
+}
+
+// MarshalJSON is Answer's JSON less each path in Unserved.
+func (s Served) MarshalJSON() ([]byte, error) {
+	raw, err := json.Marshal(s.Answer)
+	if err != nil {
+		return nil, err
+	}
+	for _, path := range s.Unserved {
+		if raw, err = without(raw, strings.Split(path, ".")); err != nil {
+			return nil, err
+		}
+	}
+	return raw, nil
+}
+
+// without is the JSON object raw less the member at path, every other member
+// kept in its place. Anything but an object, or one without that member, is raw.
+func without(raw json.RawMessage, path []string) (json.RawMessage, error) {
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	if open, err := decoder.Token(); err != nil || open != json.Delim('{') {
+		return raw, nil
+	}
+	var out bytes.Buffer
+	out.WriteByte('{')
+	for decoder.More() {
+		key, err := decoder.Token()
+		if err != nil {
+			return nil, err
+		}
+		var value json.RawMessage
+		if err := decoder.Decode(&value); err != nil {
+			return nil, err
+		}
+		if key == path[0] {
+			if len(path) == 1 {
+				continue
+			}
+			if value, err = without(value, path[1:]); err != nil {
+				return nil, err
+			}
+		}
+		if out.Len() > 1 {
+			out.WriteByte(',')
+		}
+		encoded, err := json.Marshal(key)
+		if err != nil {
+			return nil, err
+		}
+		out.Write(encoded)
+		out.WriteByte(':')
+		out.Write(value)
+	}
+	out.WriteByte('}')
+	return out.Bytes(), nil
 }
 
 // walk flattens nested objects into dotted keys.

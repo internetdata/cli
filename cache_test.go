@@ -93,8 +93,10 @@ func TestCacheServesAnAnswerOnlyToTheKeyAndHostThatFetchedIt(t *testing.T) {
 	hosting := true
 
 	maxTier := open("key-max", "")
-	maxTier.cache.PutBatch(map[string]*internetdata.Result{
-		ip: {LookupResponse: internetdata.LookupResponse{IP: ip, IsHosting: &hosting}},
+	maxTier.cache.PutBatch(map[string]Answer{
+		ip: {Result: &internetdata.Result{
+			LookupResponse: internetdata.LookupResponse{IP: ip, IsHosting: &hosting},
+		}},
 	}, "")
 	maxTier.Close()
 
@@ -115,7 +117,7 @@ func TestCacheServesAnAnswerOnlyToTheKeyAndHostThatFetchedIt(t *testing.T) {
 	again := open("key-max", "")
 	hit := again.cache.Get(ip, "")
 	again.Close()
-	if hit == nil || hit.IsHosting == nil {
+	if hit == nil || hit.Result.IsHosting == nil {
 		t.Error("the max key does not get its own cached answer back")
 	}
 }
@@ -125,7 +127,9 @@ func TestCacheServesAnAnswerOnlyToTheKeyAndHostThatFetchedIt(t *testing.T) {
 func TestCacheForgetsAnExpiredAnswer(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	const ip = "45.83.91.1"
-	answer := map[string]*internetdata.Result{ip: {LookupResponse: internetdata.LookupResponse{IP: ip}}}
+	answer := map[string]Answer{
+		ip: {Result: &internetdata.Result{LookupResponse: internetdata.LookupResponse{IP: ip}}},
+	}
 
 	fresh, err := OpenCache("k", "", time.Hour)
 	if err != nil {
@@ -173,11 +177,11 @@ func TestCacheSkipsAnAnswerReducedByTheTrialOrTheCap(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer cache.Close()
-	batch := make(map[string]*internetdata.Result, len(answers))
+	batch := make(map[string]Answer, len(answers))
 	for _, a := range answers {
-		batch[a.ip] = &internetdata.Result{LookupResponse: internetdata.LookupResponse{
+		batch[a.ip] = Answer{Result: &internetdata.Result{LookupResponse: internetdata.LookupResponse{
 			IP: a.ip, TrialExpired: a.trialExpired, CapReached: a.capReached,
-		}}
+		}}}
 	}
 	cache.PutBatch(batch, "")
 	for _, a := range answers {
