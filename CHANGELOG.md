@@ -2,6 +2,15 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. 1.0.0, the first release, is described by the commits up to its tag.
 
+## 1.11.1 - 2026-11-27
+
+### Fixes
+
+- Take sdk-go v2.19.0: a lookup without a key answers again ([`4b129a5`](https://github.com/internetdata/cli/commit/4b129a5159c9c0ca8a3479af94853afa246b2890))
+- README and help: the free plan answers Tor, relay and anycast ([`38dd3ae`](https://github.com/internetdata/cli/commit/38dd3aec77ed9cd3ac97a694afee33df64d810eb))
+- README: whoami's example shows the Data plan ([`712c9c5`](https://github.com/internetdata/cli/commit/712c9c5e22189505ccdc718715ce1b5cbd7d00bd))
+- Take sdk-go v2.18.1 ([`7433795`](https://github.com/internetdata/cli/commit/7433795a3ccba8be3bcef73fba84c774d06f8730))
+
 ## 1.11.0 - 2026-11-25
 
 ### Breaking changes
