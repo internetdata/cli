@@ -179,7 +179,6 @@ location.flag_unicode     U+1F1E6 U+1F1F9
 asn.asn                   9009
 asn.name                  M247 Europe SRL
 asn.domain                m247global.com
-asn.type                  hosting
 asn.prefix                146.70.116.0/24
 asn.country               RO
 asn.rpki_status           not_found
@@ -189,7 +188,7 @@ abuse.email               abuse@m247.ro
 hostname                  ""
 ```
 
-That is Unlimited's answer, without a key. A paid plan adds `is_vpn`, `is_hosting`, `is_cdn`, `is_bot`, the four proxy flags, whether it is a carrier or satellite network and whether it runs SSH, SMTP, a web server, a DNS resolver or BitTorrent, the provider and confidence behind each flag, whose bot uses the address, what each service answered, the location down to the city, and the whois records.
+That is Unlimited's answer, without a key. A paid plan adds `is_vpn`, `is_hosting`, `is_cdn`, `is_bot`, the four proxy flags, the AS's type, whether it is a carrier or satellite network and whether it runs SSH, SMTP, a web server, a DNS resolver or BitTorrent, the provider and confidence behind each flag, whose bot uses the address, what each service answered, the location down to the city, and the whois records.
 
 Private, reserved and documentation addresses are answered locally without a request, so they cost nothing and work offline.
 
